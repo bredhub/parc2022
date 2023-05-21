@@ -1,0 +1,8 @@
+prefix=/home/bredhub/catkin_ws/devel
+
+Name: test_publisher
+Description: Description of test_publisher
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

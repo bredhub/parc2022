@@ -1,0 +1,8 @@
+prefix=/home/bredhub/catkin_ws/install
+
+Name: solution_task_two
+Description: Description of solution_task_two
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

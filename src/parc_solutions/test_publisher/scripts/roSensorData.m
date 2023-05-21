@@ -1,0 +1,129 @@
+function roSensorData()
+    % Set up the ROS environment
+    rosinit
+    
+    % Create a MATLAB ROS node
+    node = ros.Node('weed_detection');
+    
+    % Create the subscriber for robot status
+    subRobotStatus = ros.Subscriber(node, '/parc_robot/robot_status', 'std_msgs/String');
+    sub_status = receive(subRobotStatus);
+
+    disp(sub_status);
+    
+    % Initialize the robot status variables
+    robotStatusStarted = false;
+    robotStatusFinished = false;
+
+    if(sub_status == "started")
+        robotStatusStarted = true;
+        robotStatusFinished = false;
+    elseif (sub_status == "finished")
+        robotStatusStarted = true;
+        robotStatusFinished = false;
+    end
+        
+    
+    % Create the array for storing seen weed coordinates
+    all_seen_weed = [];
+    
+    % Loop until the robot status is finished
+    while true
+        % Check if the robot status is started
+        if robotStatusStarted
+            % Create subscribers for the sensors
+            subLiDAR = ros.Subscriber(node, '/scan', 'sensor_msgs/LaserScan', @LiDARCallback);
+            subLeftCamera = ros.Subscriber(node, '/left_camera/image_raw', 'sensor_msgs/Image', @leftCameraCallback);
+            subRightCamera = ros.Subscriber(node, '/right_camera/image_raw', 'sensor_msgs/Image', @rightCameraCallback);
+            subZED2Imu = ros.Subscriber(node, '/zed2/imu/data', 'sensor_msgs/Imu', @ZED2ImuCallback);
+            subZED2PointCloud = ros.Subscriber(node, '/zed2/point_cloud/cloud_registered', 'sensor_msgs/PointCloud2', @ZED2PointCloudCallback);
+            subGPS = ros.Subscriber(node, '/gps', 'sensor_msgs/NavSatFix', @GPSCallback);
+            
+            % Loop until the robot status is finished
+            while true
+                if robotStatusFinished
+                    break;  % Exit the inner loop if robot status is finished
+                end
+                
+                % Perform other operations while the sensors are active
+                
+                pause(1);  % Add a delay between iterations
+            end
+            
+            % Shutdown the sensor subscribers
+            delete(subLiDAR);
+            delete(subLeftCamera);
+            delete(subRightCamera);
+            delete(subZED2Imu);
+            delete(subZED2PointCloud);
+            delete(subGPS);
+        else
+            break;  % Exit the outer loop if robot status is not started
+        end
+        
+        pause(1);  % Add a delay between iterations
+    end
+    
+    % Create the publisher for weed detection
+    pubWeedDetection = ros.Publisher(node, '/parc_robot/weed_detection', 'std_msgs/String');
+    
+    % Convert the array to JSON format
+    json_data = jsonencode(all_seen_weed);
+    
+    % Create the message
+    msg = rosmessage('std_msgs/String');
+    msg.Data = json_data;
+    
+    % Publish the array as JSON
+    send(pubWeedDetection, msg);
+    
+    % Shutdown the robot status subscriber
+     delete(subRobotStatus);
+    
+    % Shut down the node and disconnect from the ROS network
+    rosshutdown
+end
+
+% Callback function for YDLiDAR sensor (LaserScan)
+function LiDARCallback(msg)
+    disp(msg);
+    % Process the LiDAR data and extract the coordinates
+    % ...
+end
+
+% Callback function for left RGB camera
+function leftCameraCallback(msg)
+    disp(msg);
+    % Process the left camera data and extract the coordinates
+    % ...
+end
+
+% Callback function for right RGB camera
+function rightCameraCallback(msg)
+    disp(msg)
+    % Process the right camera data and extract the coordinates
+    % ...
+end
+
+% Callback function for ZED 2i camera (IMU data)
+function ZED2ImuCallback(msg)
+    disp(msg)
+    % Process the ZED 2i IMU data and extract the coordinates
+    % ...
+end
+
+% Callback function for ZED 2i camera (point cloud)
+function ZED2PointCloudCallback(msg)
+    disp(msg)
+    % Process the ZED 2i point cloud data and extract the coordinates
+    % ...
+end
+
+% Callback function for GPS sensor
+function GPSCallback(msg)
+    disp(msg)
+% Process the GPS data and extract the coordinates
+    % ...
+end
+
+

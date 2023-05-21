@@ -1,0 +1,8 @@
+prefix=/home/bredhub/catkin_ws/devel
+
+Name: ugv_sdk
+Description: Description of ugv_sdk
+Version: 0.1.6
+Cflags: -I/home/bredhub/catkin_ws/src/PARC-Engineers-League/ugv_sdk/include
+Libs: -L${prefix}/lib -lugv_sdk
+Requires: 

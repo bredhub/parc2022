@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="matlab" type="matlab" name="my_robot_node" output="screen">
+    <param name="MATLAB_exec" value="matlab" />
+    <param name="MATLAB_script" value="task_solution_two.m" />
+  </node>
+</launch>

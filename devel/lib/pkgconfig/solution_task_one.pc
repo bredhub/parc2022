@@ -1,0 +1,8 @@
+prefix=/home/bredhub/catkin_ws/devel
+
+Name: solution_task_one
+Description: Description of solution_task_one
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

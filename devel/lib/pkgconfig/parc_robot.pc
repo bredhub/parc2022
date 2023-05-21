@@ -1,0 +1,8 @@
+prefix=/home/bredhub/catkin_ws/devel
+
+Name: parc_robot
+Description: Description of parc_robot
+Version: 0.0.0
+Cflags: -I/home/bredhub/catkin_ws/devel/include
+Libs: -L${prefix}/lib 
+Requires: 
