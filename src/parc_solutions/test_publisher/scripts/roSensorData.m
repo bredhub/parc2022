@@ -1,129 +1,182 @@
-function roSensorData()
-    % Set up the ROS environment
-    rosinit
-    
-    % Create a MATLAB ROS node
-    node = ros.Node('weed_detection');
-    
-    % Create the subscriber for robot status
-    subRobotStatus = ros.Subscriber(node, '/parc_robot/robot_status', 'std_msgs/String');
-    sub_status = receive(subRobotStatus);
+% Define the callback functions
 
-    disp(sub_status);
+function lidarCallback(~, data)
+    global detectedList robotStatus sampleWeedImage
     
-    % Initialize the robot status variables
-    robotStatusStarted = false;
-    robotStatusFinished = false;
-
-    if(sub_status == "started")
-        robotStatusStarted = true;
-        robotStatusFinished = false;
-    elseif (sub_status == "finished")
-        robotStatusStarted = true;
-        robotStatusFinished = false;
+    if strcmp(robotStatus, 'started')
+        detectedObjects = extractDetectedObjects(data);
+        filteredObjects = filterWeedObjects(detectedObjects);
+        detectedList = [detectedList; filteredObjects];
     end
-        
+end
+
+function detectedObjects = extractDetectedObjects(data)
+    detectedObjects = [];
+    angleMin = data.AngleMin;
+    angleIncrement = data.AngleIncrement;
     
-    % Create the array for storing seen weed coordinates
-    all_seen_weed = [];
-    
-    % Loop until the robot status is finished
-    while true
-        % Check if the robot status is started
-        if robotStatusStarted
-            % Create subscribers for the sensors
-            subLiDAR = ros.Subscriber(node, '/scan', 'sensor_msgs/LaserScan', @LiDARCallback);
-            subLeftCamera = ros.Subscriber(node, '/left_camera/image_raw', 'sensor_msgs/Image', @leftCameraCallback);
-            subRightCamera = ros.Subscriber(node, '/right_camera/image_raw', 'sensor_msgs/Image', @rightCameraCallback);
-            subZED2Imu = ros.Subscriber(node, '/zed2/imu/data', 'sensor_msgs/Imu', @ZED2ImuCallback);
-            subZED2PointCloud = ros.Subscriber(node, '/zed2/point_cloud/cloud_registered', 'sensor_msgs/PointCloud2', @ZED2PointCloudCallback);
-            subGPS = ros.Subscriber(node, '/gps', 'sensor_msgs/NavSatFix', @GPSCallback);
-            
-            % Loop until the robot status is finished
-            while true
-                if robotStatusFinished
-                    break;  % Exit the inner loop if robot status is finished
-                end
-                
-                % Perform other operations while the sensors are active
-                
-                pause(1);  % Add a delay between iterations
-            end
-            
-            % Shutdown the sensor subscribers
-            delete(subLiDAR);
-            delete(subLeftCamera);
-            delete(subRightCamera);
-            delete(subZED2Imu);
-            delete(subZED2PointCloud);
-            delete(subGPS);
-        else
-            break;  % Exit the outer loop if robot status is not started
+    for i = 1:numel(data.Ranges)
+        distance = data.Ranges(i);
+        if distance < 1.0
+            angle = angleMin + (i-1) * angleIncrement;
+            x = distance * cos(angle);
+            y = distance * sin(angle);
+            detectedObjects = [detectedObjects; x, y];
         end
-        
-        pause(1);  % Add a delay between iterations
     end
+end
+
+function filteredObjects = filterWeedObjects(detectedObjects)
+    global sampleWeedImage
     
-    % Create the publisher for weed detection
-    pubWeedDetection = ros.Publisher(node, '/parc_robot/weed_detection', 'std_msgs/String');
+    filteredObjects = [];
+    threshold = 0.8;
+    sampleWeedImageGray = rgb2gray(sampleWeedImage);
     
-    % Convert the array to JSON format
-    json_data = jsonencode(all_seen_weed);
+    for i = 1:size(detectedObjects, 1)
+        obj = detectedObjects(i, :);
+        objResized = imresize(obj, [size(sampleWeedImageGray, 1), size(sampleWeedImageGray, 2)]);
+        
+        % Perform template matching
+        result = normxcorr2(objResized, sampleWeedImageGray);
+        
+        % Find the maximum correlation value
+        [maxValue, ~] = max(result(:));
+        
+        if maxValue >= threshold
+            filteredObjects = [filteredObjects; obj];
+        end
+    end
+end
+
+function leftCameraCallback(~, data)
+    global detectedList robotStatus sampleWeedImage
     
-    % Create the message
-    msg = rosmessage('std_msgs/String');
-    msg.Data = json_data;
+    if strcmp(robotStatus, 'started')
+        cvImage = reshape(typecast(data.Data, 'uint8'), [data.Height, data.Width, data.Step]);
+        matchedObjects = compareWithSample(cvImage, sampleWeedImage);
+        detectedList = [detectedList; matchedObjects];
+    end
+end
+
+function matchedObjects = compareWithSample(image, sampleWeedImage)
+    matchedObjects = [];
+    threshold = 0.22;
+    imageGray = rgb2gray(image);
+    sampleWeedImageGray = rgb2gray(sampleWeedImage);
     
-    % Publish the array as JSON
-    send(pubWeedDetection, msg);
+    % Perform template matching
+    result = normxcorr2(sampleWeedImageGray, imageGray);
     
-    % Shutdown the robot status subscriber
-     delete(subRobotStatus);
+    % Find the locations where the correlation exceeds the threshold
+    [rows, cols] = find(result >= threshold);
     
-    % Shut down the node and disconnect from the ROS network
-    rosshutdown
+    % Append the matched object coordinates to the list
+    for i = 1:numel(rows)
+        matchedObjects = [matchedObjects; cols(i), rows(i)];
+    end
 end
 
-% Callback function for YDLiDAR sensor (LaserScan)
-function LiDARCallback(msg)
-    disp(msg);
-    % Process the LiDAR data and extract the coordinates
-    % ...
+function rightCameraCallback(~, data)
+    global detectedList robotStatus sampleWeedImage
+    
+    if strcmp(robotStatus, 'started')
+        cvImage = reshape(typecast(data.Data, 'uint8'), [data.Height, data.Width, data.Step]);
+        matchedObjects = compareWithSample(cvImage, sampleWeedImage);
+        detectedList = [detectedList; matchedObjects];
+    end
 end
 
-% Callback function for left RGB camera
-function leftCameraCallback(msg)
-    disp(msg);
-    % Process the left camera data and extract the coordinates
-    % ...
+function zedCameraCallback(~, data)
+    global detectedList robotStatus sampleWeedImage
+    
+    if strcmp(robotStatus, 'started')
+        cvImage = reshape(typecast(data.Data, 'uint8'), [data.Height, data.Width, data.Step]);
+        matchedObjects = compareWithSample(cvImage, sampleWeedImage);
+        detectedList = [detectedList; matchedObjects];
+    end
 end
 
-% Callback function for right RGB camera
-function rightCameraCallback(msg)
-    disp(msg)
-    % Process the right camera data and extract the coordinates
-    % ...
+function gpsCallback(~, data)
+    global detectedList
+    
+    if strcmp(robotStatus, 'started')
+        [x, y] = gpsToCartesian(data.Latitude, data.Longitude);
+        lastDetectedObjectIndex = size(detectedList, 1);
+        detectedList(lastDetectedObjectIndex, 3:4) = [x, y];
+    end
 end
 
-% Callback function for ZED 2i camera (IMU data)
-function ZED2ImuCallback(msg)
-    disp(msg)
-    % Process the ZED 2i IMU data and extract the coordinates
-    % ...
+function robotStatusCallback(~, data)
+    global robotStatus
+    
+    robotStatus = data.Data;
+    
+    if strcmp(robotStatus, 'started')
+        disp('Robot status: Started');
+    elseif strcmp(robotStatus, 'finished')
+        disp('Robot status: Finished');
+        disp('Detected objects:');
+        disp(detectedList);
+        disp('Number of detected objects:');
+        disp(size(detectedList, 1));
+        disp('Exiting...');
+        clear global;  % Clear global variables
+        return;
+    end
 end
 
-% Callback function for ZED 2i camera (point cloud)
-function ZED2PointCloudCallback(msg)
-    disp(msg)
-    % Process the ZED 2i point cloud data and extract the coordinates
-    % ...
+% Set up the necessary variables
+
+global detectedList robotStatus sampleWeedImage
+
+% Global flag to track the robot status
+robotStatus = 'finished';
+
+% Path to the sample weed image
+sampleWeedImagePath = 'path/to/sample/weed/image.png';
+
+% Load the sample weed image
+sampleWeedImage = imread(sampleWeedImagePath);
+
+% Initialize the detected list
+detectedList = [];
+
+% Set up ROS and subscribers
+
+rosinit;
+
+% Subscribe to LiDAR sensor
+lidarSub = rossubscriber('/scan');
+lidarSub.NewMessageFcn = @lidarCallback;
+
+% Subscribe to left and right cameras
+leftCameraSub = rossubscriber('/left_camera/image_raw');
+leftCameraSub.NewMessageFcn = @leftCameraCallback;
+
+rightCameraSub = rossubscriber('/right_camera/image_raw');
+rightCameraSub.NewMessageFcn = @rightCameraCallback;
+
+% Subscribe to ZED camera topics
+zedLeftCameraSub = rossubscriber('/zed2/left/image_rect_color');
+zedLeftCameraSub.NewMessageFcn = @zedCameraCallback;
+
+zedRightCameraSub = rossubscriber('/zed2/right/image_rect_color');
+zedRightCameraSub.NewMessageFcn = @zedCameraCallback;
+
+% Subscribe to GPS sensor
+gpsSub = rossubscriber('/gps');
+gpsSub.NewMessageFcn = @gpsCallback;
+
+% Subscribe to robot status topic
+robotStatusSub = rossubscriber('/parc_robot/robot_status');
+robotStatusSub.NewMessageFcn = @robotStatusCallback;
+
+% Wait until the robot finishes
+while ~strcmp(robotStatus, 'finished')
+    pause(1);  % Add a small delay to avoid high CPU usage
 end
 
-% Callback function for GPS sensor
-function GPSCallback(msg)
-    disp(msg)
-% Process the GPS data and extract the coordinates
-    % ...
-end
+% Clean up
 
-
+rosshutdown;
