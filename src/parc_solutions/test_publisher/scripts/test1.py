@@ -99,14 +99,13 @@ def left_camera():
 
 def estimate_distance(cv_image, focal):
     # Convert the image to HSV color space
-    hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+    gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
     
-    # Define the lower and upper bounds for green color in HSV
-    lower_green = np.array([39, 106, 124])  # Adjust these values based on your specific shade of green
-    upper_green = np.array([77, 237, 189])  # Adjust these values based on your specific shade of green
+    ## Apply a threshold to convert the grayscale image to binary
+    _, binary_image = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     
-    # Threshold the image to extract green regions
-    mask = cv2.inRange(hsv_image, lower_green, upper_green)
+    # Find contours of the binary image
+    contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     # Apply morphological operations (optional) to remove noise or fill gaps
     kernel = np.ones((5, 5), np.uint8)
@@ -114,21 +113,28 @@ def estimate_distance(cv_image, focal):
     
     # Find contours of the green regions
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # Perform distance estimation based on the contours
-    # You can implement your own distance estimation algorithm here
-    focal_length = 100
-    # For demonstration purposes, let's assume a constant focal length and object size
-    if focal.K[0] != 0:
-        focal_length = focal.K[0]  # Focal length in pixels
-        rospy.loginfo(f"Focal length: {focal_length}")
+    if len(contours) > 0:
+        # Calculate the area of the largest contour
+        max_area = max(cv2.contourArea(cnt) for cnt in contours)
         
-    object_size = 10  # Object size in centimeters
-    print("image area "+ str(cv2.contourArea(contours[0])))
-    # Estimate the distance using simple geometry (assuming pinhole camera model)
-    distance = (object_size * focal_length) / cv2.contourArea(contours[0])
+        # Return the area of the largest contour as an indicator of obstacle presence
+      
+        # Perform distance estimation based on the contours
+        # You can implement your own distance estimation algorithm here
+        focal_length = 100
+        # For demonstration purposes, let's assume a constant focal length and object size
+        if focal.K[0] != 0:
+            focal_length = focal.K[0]  # Focal length in pixels
+            rospy.loginfo(f"Focal length: {focal_length}")
+        
+        object_size = 10  # Object size in centimeters
+        print("image area "+ str(cv2.contourArea(contours[0])))
+        # Estimate the distance using simple geometry (assuming pinhole camera model)
+        distance = (object_size * focal_length) / max_area
     
-    return distance
+        return distance
+    
+    return None
 
 def right_camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
@@ -146,14 +152,15 @@ def analyse_image(scan_data, camera_info):
         
         # Perform image processing and distance estimation
         distance = estimate_distance(cv_image, camera_info)
-        print("image_distance "+ str(distance))
-        print("-----------------")
-        # Display the image and distance
-        # cv2.imshow("Camera Image", cv_image)
-        print("Estimated Distance:", distance)
-        # cv2.waitKey(1)
-        if distance < 0.09:
-            turn = True
+        if distance is not None:
+            print("image_distance "+ str(distance))
+            print("-----------------")
+            # Display the image and distance
+            # cv2.imshow("Camera Image", cv_image)
+            print("Estimated Distance:", distance)
+            # cv2.waitKey(1)
+            if distance < 0.09:
+                turn = True
             
         return turn
     except Exception as e:
