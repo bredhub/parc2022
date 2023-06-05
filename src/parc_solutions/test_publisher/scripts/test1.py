@@ -144,9 +144,9 @@ def think(scan_data, robot_position):
         # Convert the orientation to Euler angles
         (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
         if yaw <=0:
-            desired_angular_vel = 0.05
+            desired_angular_vel = 0.01
         elif yaw >= 0:
-            desired_angular_vel = -0.05
+            desired_angular_vel = -0.01
         
         move_flag = True
     else:
@@ -194,13 +194,13 @@ def act(robot_vel_publisher, move_flag, robot_position):
     global desired_angular_vel
     
     robot_vel = Twist()
-    fwd_vel = 0.3
+    fwd_vel = 0.2
     
     if move_flag:
         if current_goal_is_met(robot_position):
             if main_goal_met:
                 robot_vel.linear.x = 0.0
-                robot_vel.angular.z = desired_angular_vel
+                robot_vel.angular.z = 0.0
                 msg = "Robot stopped because main goal is reached"
                 robot_vel_publisher.publish(robot_vel)
             else:
@@ -214,10 +214,17 @@ def act(robot_vel_publisher, move_flag, robot_position):
                 robot_vel_publisher.publish(robot_vel)
                 rospy.sleep(1)
                 
-                #starts moving
-                robot_vel.linear.x = fwd_vel
+                
+                #stop
+                robot_vel.linear.x = 0.0
                 robot_vel.angular.z = 0.0
                 robot_vel_publisher.publish(robot_vel)
+                rospy.sleep(1)
+                
+                #starts moving
+                # robot_vel.linear.x = fwd_vel
+                # robot_vel.angular.z = 0.0
+                # robot_vel_publisher.publish(robot_vel)
                 
                 msg = "Robot stopped because goal reached"
         else:         
@@ -239,23 +246,29 @@ def act(robot_vel_publisher, move_flag, robot_position):
         robot_vel.angular.z = desired_angular_vel
         robot_vel_publisher.publish(robot_vel)
         rospy.sleep(1)
-            
+        
+        
+        #stops
+        robot_vel.linear.x = 0.0
+        robot_vel.angular.z = 0.0
+        robot_vel_publisher.publish(robot_vel)
+        rospy.sleep(1)
             
         #keeps turning till it is away from obstacle
-        scan_lidar = sensor_lidar()
-        move_flag_again = think(scan_lidar)
+        # scan_lidar = sensor_lidar()
+        # move_flag_again = think(scan_lidar)
             
-        while not move_flag_again:
-            #turns away from obstacle
-            robot_vel.linear.x = 0.0
-            robot_vel.angular.z = desired_angular_vel
-            robot_vel_publisher.publish(robot_vel)
-            rospy.sleep(1)
+        # while not move_flag_again:
+        #     #turns away from obstacle
+        #     robot_vel.linear.x = 0.0
+        #     robot_vel.angular.z = desired_angular_vel
+        #     robot_vel_publisher.publish(robot_vel)
+        #     rospy.sleep(1)
             
-        robot_vel.linear.x = fwd_vel
-        robot_vel.angular.z = 0.0
-        msg = "Robot turned! because of obstacle \n"
-        robot_vel_publisher.publish(robot_vel)
+        # robot_vel.linear.x = fwd_vel
+        # robot_vel.angular.z = 0.0
+        # msg = "Robot turned! because of obstacle \n"
+        # robot_vel_publisher.publish(robot_vel)
 
     return msg
     
