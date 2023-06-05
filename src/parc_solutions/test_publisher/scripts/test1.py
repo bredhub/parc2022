@@ -195,7 +195,7 @@ def act(robot_vel_publisher, move_flag, robot_position):
     robot_vel = Twist()
     fwd_vel = 0.3
     
-    if move_flag[0]:
+    if move_flag:
         if current_goal_is_met(robot_position):
             if main_goal_met:
                 robot_vel.linear.x = 0.0
