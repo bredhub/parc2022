@@ -145,9 +145,9 @@ def think(scan_data, robot_position = None):
         move_flag = True
     else:
         if left_distance <= approach_threshold:
-            desired_angular_vel = 0.1
+            desired_angular_vel = -0.07
         elif right_distance <= approach_threshold:
-            desired_angular_vel = -0.1
+            desired_angular_vel = 0.07
         else:
             print("obstacle in front")
         
