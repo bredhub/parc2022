@@ -133,29 +133,48 @@ def gps():
     return [x, y]
 
 def think(scan_data, robot_position):
-    global desired_angular_vel
-    fwd_range = scan_data.ranges[180:270]
-    distance_to_wall = sum(fwd_range)/len(fwd_range)
+    forward_range = scan_data.ranges[180:270]
+    left_range = scan_data.ranges[90:180]
+    right_range = scan_data.ranges[270:360]
+    forward_distance = sum(forward_range) / len(forward_range)
+    left_distance = sum(left_range) / len(left_range)
+    right_distance = sum(right_range) / len(right_range)
     approach_threshold = 0.1
     
-    
-    if distance_to_wall > approach_threshold:
-        
-        
+    if forward_distance > approach_threshold and left_distance > approach_threshold and right_distance > approach_threshold:
         move_flag = True
     else:
-        #get where robot is pointing to
+        # Get where the robot is pointing to
         orientation = robot_position.pose.pose.orientation
         
         # Convert the orientation to Euler angles
         (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        if yaw <=0:
+        if yaw <= 0:
             desired_angular_vel = 0.01
-        elif yaw >= 0:
+        else:
             desired_angular_vel = -0.01
         move_flag = False
 
-    print(f'Distance to wall: {distance_to_wall}')
+    print(f'Distance to wall (forward): {forward_distance}')
+    print(f'Distance to wall (left): {left_distance}')
+    print(f'Distance to wall (right): {right_distance}')
+    # if distance_to_wall > approach_threshold:
+        
+        
+    #     move_flag = True
+    # else:
+    #     #get where robot is pointing to
+    #     orientation = robot_position.pose.pose.orientation
+        
+    #     # Convert the orientation to Euler angles
+    #     (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+    #     if yaw <=0:
+    #         desired_angular_vel = 0.01
+    #     elif yaw >= 0:
+    #         desired_angular_vel = -0.01
+    #     move_flag = False
+
+    # print(f'Distance to wall: {distance_to_wall}')
 
     return move_flag  
 
@@ -183,15 +202,15 @@ def distance_between_two_point(pointA, pointB):
 
 def current_goal_is_met(robot_position):
     global current_location,prev_index_target, prev_location, current_index_target, desired_angular_vel
-    print(robot_position)
-    print(current_location)
-    print("--------------------")
+    # print(robot_position)
+    # print(current_location)
+    # print("--------------------")
     initial_point_final = distance_between_two_point(prev_location, current_location)
     robot_goal = distance_between_two_point(robot_position, current_location)
     robot_initial = distance_between_two_point(robot_position, prev_location)
-    print(initial_point_final)
-    print(robot_goal)
-    print("-----------------")
+    # print(initial_point_final)
+    # print(robot_goal)
+    # print("-----------------")
     if((robot_initial >= initial_point_final)):
         if current_index_target == 6:
             main_goal_met = True
