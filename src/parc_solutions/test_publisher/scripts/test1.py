@@ -212,7 +212,7 @@ def think(scan_data, robot_position=None):
         
         if yaw <= 0:
             desired_angular_vel = 0.03
-        elif yaw >= 0:
+        elif yaw > 0:
             desired_angular_vel = -0.03
         
         move_flag = False
