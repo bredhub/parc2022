@@ -98,29 +98,20 @@ def left_camera():
 
 
 def estimate_distance(cv_image, focal):
-    # Convert the image to HSV color space
+    # Convert the image to grayscale
     gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
     
-    ## Apply a threshold to convert the grayscale image to binary
+    # Apply a threshold to convert the grayscale image to binary
     _, binary_image = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     
     # Find contours of the binary image
     contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    # Apply morphological operations (optional) to remove noise or fill gaps
-    kernel = np.ones((5, 5), np.uint8)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    
-    # Find contours of the green regions
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if len(contours) > 0:
         # Calculate the area of the largest contour
         max_area = max(cv2.contourArea(cnt) for cnt in contours)
         
-        # Return the area of the largest contour as an indicator of obstacle presence
-      
         # Perform distance estimation based on the contours
-        # You can implement your own distance estimation algorithm here
         focal_length = 100
         # For demonstration purposes, let's assume a constant focal length and object size
         if focal.K[0] != 0:
@@ -128,9 +119,9 @@ def estimate_distance(cv_image, focal):
             rospy.loginfo(f"Focal length: {focal_length}")
         
         object_size = 10  # Object size in centimeters
-        print("image area "+ str(cv2.contourArea(contours[0])))
+        print("image area: " + str(max_area))
         # Estimate the distance using simple geometry (assuming pinhole camera model)
-        distance = (object_size * focal_length) / max_area
+        distance = (object_size * focal_length) / math.sqrt(max_area)
     
         return distance
     
@@ -152,21 +143,20 @@ def analyse_image(scan_data, camera_info):
         
         # Perform image processing and distance estimation
         distance = estimate_distance(cv_image, camera_info)
-        print("image_distance "+ str(distance))
+        print("image_distance: " + str(distance))
         print("-----------------")
         # Display the image and distance
         # cv2.imshow("Camera Image", cv_image)
         print("Estimated Distance:", distance)
         if distance is not None:
-            
             # cv2.waitKey(1)
             if distance < 0.09:
                 turn = True
             
         return turn
     except Exception as e:
-            rospy.logerr(f"Error processing image: {str(e)}")
-            return False
+        rospy.logerr(f"Error processing image: {str(e)}")
+        return False
     
 def right_camera_info():
     scan_data = rospy.wait_for_message('/right_camera/camera_info', CameraInfo)
