@@ -204,23 +204,24 @@ def act(robot_vel_publisher, move_flag, robot_position):
                 robot_vel.angular.z = 0.0
                 msg = "Robot stopped because main goal is reached"
                 robot_vel_publisher.publish(robot_vel)
+                break
             else:
-                robot_vel.linear.x = 0.0
+                robot_vel.linear.x = 0.2
                 robot_vel.angular.z = 0.0
                 robot_vel_publisher.publish(robot_vel)
                 rospy.sleep(1)
                 
-                #turns to next goal
-                robot_vel.angular.z = desired_angular_vel
-                robot_vel_publisher.publish(robot_vel)
-                rospy.sleep(1)
+                # #turns to next goal
+                # robot_vel.angular.z = desired_angular_vel
+                # robot_vel_publisher.publish(robot_vel)
+                # rospy.sleep(1)
                 
                 
-                #stop
-                robot_vel.linear.x = 0.0
-                robot_vel.angular.z = 0.0
-                robot_vel_publisher.publish(robot_vel)
-                rospy.sleep(1)
+                # #stop
+                # robot_vel.linear.x = 0.0
+                # robot_vel.angular.z = 0.0
+                # robot_vel_publisher.publish(robot_vel)
+                # rospy.sleep(1)
                 
                 #starts moving
                 # robot_vel.linear.x = fwd_vel
@@ -228,12 +229,14 @@ def act(robot_vel_publisher, move_flag, robot_position):
                 # robot_vel_publisher.publish(robot_vel)
                 
                 msg = "Robot stopped because goal reached"
+                break
         else:         
             #continue movement
             robot_vel.linear.x = fwd_vel
             robot_vel.angular.z = 0.0
             msg = "Robot Moving! \n"
             robot_vel_publisher.publish(robot_vel)
+            break
  
     else:
         #stops
@@ -242,18 +245,18 @@ def act(robot_vel_publisher, move_flag, robot_position):
         robot_vel_publisher.publish(robot_vel)
         rospy.sleep(1)
             
-        #turns away from obstacle
-        robot_vel.linear.x = 0.0
-        robot_vel.angular.z = desired_angular_vel
-        robot_vel_publisher.publish(robot_vel)
-        rospy.sleep(1)
+        # #turns away from obstacle
+        # robot_vel.linear.x = 0.0
+        # robot_vel.angular.z = desired_angular_vel
+        # robot_vel_publisher.publish(robot_vel)
+        # rospy.sleep(1)
         
         
-        #stops
-        robot_vel.linear.x = 0.0
-        robot_vel.angular.z = 0.0
-        robot_vel_publisher.publish(robot_vel)
-        rospy.sleep(1)
+        # #stops
+        # robot_vel.linear.x = 0.0
+        # robot_vel.angular.z = 0.0
+        # robot_vel_publisher.publish(robot_vel)
+        # rospy.sleep(1)
             
         #keeps turning till it is away from obstacle
         # scan_lidar = sensor_lidar()
@@ -268,9 +271,9 @@ def act(robot_vel_publisher, move_flag, robot_position):
             
         # robot_vel.linear.x = fwd_vel
         # robot_vel.angular.z = 0.0
-        # msg = "Robot turned! because of obstacle \n"
+        msg = "Robot turned! because of obstacle \n"
         # robot_vel_publisher.publish(robot_vel)
-
+        break
     return msg
     
 
