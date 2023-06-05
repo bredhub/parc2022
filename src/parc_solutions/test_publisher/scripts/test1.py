@@ -119,8 +119,8 @@ def estimate_distance(cv_image, focal):
     # You can implement your own distance estimation algorithm here
     focal_length = 100
     # For demonstration purposes, let's assume a constant focal length and object size
-    if msg.K[0] != 0:
-        focal_length = focal  # Focal length in pixels
+    if focal.K[0] != 0:
+        focal_length = focal.K[0]  # Focal length in pixels
         rospy.loginfo(f"Focal length: {focal_length}")
         
     object_size = 10  # Object size in centimeters
