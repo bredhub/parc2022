@@ -132,7 +132,7 @@ def gps():
     x, y = gps_to_cartesian(current_lat, current_lon)
     return [x, y]
 
-def think(scan_data, robot_position):
+def think(scan_data, robot_position = None):
     forward_range = scan_data.ranges[180:270]
     left_range = scan_data.ranges[90:180]
     right_range = scan_data.ranges[270:360]
@@ -145,9 +145,9 @@ def think(scan_data, robot_position):
         move_flag = True
     else:
         if left_distance <= approach_threshold:
-            desired_angular_vel = -0.01
-        elif right_distance <= approach_threshold:
             desired_angular_vel = 0.01
+        elif right_distance <= approach_threshold:
+            desired_angular_vel = -0.01
         else:
             print("obstacle in front")
         
