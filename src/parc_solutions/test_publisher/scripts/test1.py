@@ -152,12 +152,13 @@ def analyse_image(scan_data, camera_info):
         
         # Perform image processing and distance estimation
         distance = estimate_distance(cv_image, camera_info)
+        print("image_distance "+ str(distance))
+        print("-----------------")
+        # Display the image and distance
+        # cv2.imshow("Camera Image", cv_image)
+        print("Estimated Distance:", distance)
         if distance is not None:
-            print("image_distance "+ str(distance))
-            print("-----------------")
-            # Display the image and distance
-            # cv2.imshow("Camera Image", cv_image)
-            print("Estimated Distance:", distance)
+            
             # cv2.waitKey(1)
             if distance < 0.09:
                 turn = True
