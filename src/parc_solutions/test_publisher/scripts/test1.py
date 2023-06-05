@@ -124,7 +124,7 @@ def estimate_distance(cv_image, focal):
         rospy.loginfo(f"Focal length: {focal_length}")
         
     object_size = 10  # Object size in centimeters
-    
+    print("image area "+ str(cv2.contourArea(contours[0])))
     # Estimate the distance using simple geometry (assuming pinhole camera model)
     distance = (object_size * focal_length) / cv2.contourArea(contours[0])
     
@@ -146,12 +146,12 @@ def analyse_image(scan_data, camera_info):
         
         # Perform image processing and distance estimation
         distance = estimate_distance(cv_image, camera_info)
-        print("image_distance"+ str(distance))
+        print("image_distance "+ str(distance))
         print("-----------------")
         # Display the image and distance
-        cv2.imshow("Camera Image", cv_image)
+        # cv2.imshow("Camera Image", cv_image)
         print("Estimated Distance:", distance)
-        cv2.waitKey(1)
+        # cv2.waitKey(1)
         if distance < 0.09:
             turn = True
             
@@ -201,7 +201,7 @@ def think(scan_data, robot_position=None):
     right_distance = sum(right_range) / len(right_range)
     approach_threshold = 5
     
-    if math.isinf(forward_distance) or math.isinf(left_distance) or math.isinf(right_distance):
+    if math.isinf(forward_distance) and math.isinf(left_distance) and math.isinf(right_distance):
         # Distance to obstacle is infinity, move towards the goal
         move_flag = True
     else:
