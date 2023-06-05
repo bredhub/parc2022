@@ -56,7 +56,7 @@ def mean_gps(x1,y1, x2, y2):
 
         return [midpoint_latitude, midpoint_longitude]
     
-def mean_average(self, pointA, pointB):
+def mean_average(pointA, pointB):
     x1, y1 = pointA
     x2, y2 = pointB
     mid_x = (x1+x2)/2
