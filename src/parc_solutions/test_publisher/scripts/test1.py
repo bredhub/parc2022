@@ -198,22 +198,24 @@ def think(scan_data, robot_position=None):
     # left_distance = sum(left_range) / len(left_range)
     # right_distance = sum(right_range) / len(right_range)
     approach_threshold = 0.161
-    min_range = min(scan_data.ranges)
+    ranges = msg.ranges
+    front_distance = min(ranges[int(len(ranges)/2-10):int(len(ranges)/2+10)])
     
-    print("min rane"+ str(min_range))
-    if min_range > approach_threshold:
+    print("min rane"+ str(front_distance))
+    if front_distance > approach_threshold:
         # Distance to obstacle is infinity, move towards the goal
         desired_angular_vel = 0.0
         move_flag = True
     else:
-        orientation = robot_position.pose.pose.orientation
-        (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        print("faing"+ str(yaw))
+        scanner = sensor_lidar()
+        ranges = scanner.ranges
+        left_distance = min(ranges[270:360])  # Measure distance in the left region
+        right_distance = min(ranges[0:90])  # M
         
-        if yaw <= 0:
-            desired_angular_vel = 0.03
-        elif yaw > 0:
+        if left_distance > right_distance:
             desired_angular_vel = -0.03
+        else:
+            desired_angular_vel = 0.03
         
         move_flag = False
     return move_flag  
