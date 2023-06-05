@@ -138,6 +138,10 @@ def think(scan_data, robot_position):
     
     
     if distance_to_wall > approach_threshold:
+        
+        
+        move_flag = True
+    else:
         #get where robot is pointing to
         orientation = robot_position.pose.pose.orientation
         
@@ -147,9 +151,6 @@ def think(scan_data, robot_position):
             desired_angular_vel = 0.01
         elif yaw >= 0:
             desired_angular_vel = -0.01
-        
-        move_flag = True
-    else:
         move_flag = False
 
     print(f'Distance to wall: {distance_to_wall}')
