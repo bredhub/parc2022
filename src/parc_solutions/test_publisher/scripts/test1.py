@@ -132,7 +132,7 @@ def gps():
 
 def think(scan_data, robot_position):
     global desired_angular_vel
-    fwd_range = scan_data.ranges[190:210]
+    fwd_range = scan_data.ranges[180:270]
     distance_to_wall = sum(fwd_range)/len(fwd_range)
     approach_threshold = 0.1
     
