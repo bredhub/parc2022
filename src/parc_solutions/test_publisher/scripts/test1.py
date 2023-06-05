@@ -96,27 +96,21 @@ def left_camera():
     scan_data = rospy.wait_for_message('/left_camera/image_raw', Image)
     return scan_data
 
-
 def estimate_distance(cv_image, focal):
-    # Convert the image to grayscale
-    gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
-    cv2.imwrite("gray_image.jpg", gray_image)
-    # cv2.imshow("Gray Image", gray_image)
-    cv2.waitKey(1)
+# Convert the image to grayscale
+    gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
     # Apply a threshold to convert the grayscale image to binary
-    _, binary_image = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    
+    COLOR_MIN = (39, 106, 124)
+    COLOR_MAX = (77, 237, 189)
+    thresh_img = cv2.inRange(gray_image, COLOR_MIN, COLOR_MAX)
     # Find contours of the binary image
-    contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    
+    contours, _ = cv2.findContours(thresh_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
     min_contour_area = 100  # Adjust this threshold based on your specific application
     contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_contour_area]
     
     if len(contours) > 0:
-        
         largest_contour = max(contours, key=cv2.contourArea)
-        # Calculate the area of the largest contour
         # Calculate the bounding rectangle of the largest contour
         x, y, w, h = cv2.boundingRect(largest_contour)
         
@@ -124,14 +118,16 @@ def estimate_distance(cv_image, focal):
         object_size = max(w, h)
         
         # Perform distance estimation based on the object size and focal length
-        # You can implement your own distance estimation algorithm here
         focal_length = focal.K[0] if focal.K[0] != 0 else 100  # Focal length in pixels (default to 100 if unknown)
         distance = (object_size * focal_length) / w  # Convert to meters (adjust scaling factor based on units)
         
-        print("image distance" + str(distance))
-        return distance
-    
-    return None
+        print("image distance:", distance)
+        if distance < 0.1:
+            # Perform obstacle avoidance actions
+            # Example: Stop the robot, change direction, etc.
+            print("Obstacle detected. Taking avoidance action.")
+            return True
+    return False
 
 def right_camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
@@ -152,18 +148,8 @@ def analyse_image(scan_data, camera_info):
         turn = False
         
         # Perform image processing and distance estimation
-        distance = estimate_distance(cv_image, camera_info)
-        print("image_distance: " + str(distance))
-        print("-----------------")
-        # Display the image and distance
-        # cv2.imshow("Camera Image", cv_image)
-        print("Estimated Distance:", distance)
-        if distance is not None:
-            # cv2.waitKey(1)
-            if distance < 0.09:
-                turn = True
-            
-        return turn
+        obstacle_detected = estimate_distance(cv_image, camera_info)
+        return obstacle_detected
     except Exception as e:
         rospy.logerr(f"Error processing image: {str(e)}")
         return False
