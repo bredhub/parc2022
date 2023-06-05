@@ -190,35 +190,30 @@ def gps():
     return [x, y]
 
 def think(scan_data, robot_position=None):
-    forward_range = scan_data.ranges[180:270]
-    left_range = scan_data.ranges[90:180]
-    right_range = scan_data.ranges[270:360]
-    forward_distance = sum(forward_range) / len(forward_range)
-    left_distance = sum(left_range) / len(left_range)
-    right_distance = sum(right_range) / len(right_range)
-    approach_threshold = 5
+    # forward_range = scan_data.ranges[180:270]
+    # left_range = scan_data.ranges[90:180]
+    # right_range = scan_data.ranges[270:360]
+    # forward_distance = sum(forward_range) / len(forward_range)
+    # left_distance = sum(left_range) / len(left_range)
+    # right_distance = sum(right_range) / len(right_range)
+    approach_threshold = 0.167
     min_range = min(scan_data.ranges)
     
     print("min rane"+ str(min_range))
-    if math.isinf(forward_distance) and math.isinf(left_distance) and math.isinf(right_distance):
+    if min_range > approach_threshold:
         # Distance to obstacle is infinity, move towards the goal
         move_flag = True
     else:
-        if forward_distance > approach_threshold and left_distance > approach_threshold and right_distance > approach_threshold:
-            # No obstacles, move towards the goal
-            move_flag = True
-        else:
-            # Obstacle detected, turn away from it
-            if left_distance <= approach_threshold:
-                desired_angular_vel = -0.07  # Turn right
-            elif right_distance <= approach_threshold:
-                desired_angular_vel = 0.07  # Turn left
-            move_flag = False
-
-    print(f'Distance to wall (forward): {forward_distance}')
-    print(f'Distance to wall (left): {left_distance}')
-    print(f'Distance to wall (right): {right_distance}')
-
+        orientation = robot_position.pose.pose.orientation
+        (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+        print("faing"+ str(yaw))
+        
+        if yaw <= 0:
+            desired_angular_vel = 0.05
+        elif yaw >= 0:
+            desired_angular_vel = -0.05
+        
+        move_flag = False
     return move_flag  
 
 def calculate_desired_heading(current_lat, current_lon):
