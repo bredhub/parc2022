@@ -204,7 +204,7 @@ def act(robot_vel_publisher, move_flag, robot_position):
                 robot_vel.angular.z = 0.0
                 msg = "Robot stopped because main goal is reached"
                 robot_vel_publisher.publish(robot_vel)
-                break
+               
             else:
                 robot_vel.linear.x = 0.2
                 robot_vel.angular.z = 0.0
@@ -229,14 +229,14 @@ def act(robot_vel_publisher, move_flag, robot_position):
                 # robot_vel_publisher.publish(robot_vel)
                 
                 msg = "Robot stopped because goal reached"
-                break
+                
         else:         
             #continue movement
             robot_vel.linear.x = fwd_vel
             robot_vel.angular.z = 0.0
             msg = "Robot Moving! \n"
             robot_vel_publisher.publish(robot_vel)
-            break
+            
  
     else:
         #stops
@@ -273,7 +273,7 @@ def act(robot_vel_publisher, move_flag, robot_position):
         # robot_vel.angular.z = 0.0
         msg = "Robot turned! because of obstacle \n"
         # robot_vel_publisher.publish(robot_vel)
-        break
+     
     return msg
     
 
