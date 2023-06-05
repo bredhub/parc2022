@@ -139,42 +139,33 @@ def think(scan_data, robot_position):
     forward_distance = sum(forward_range) / len(forward_range)
     left_distance = sum(left_range) / len(left_range)
     right_distance = sum(right_range) / len(right_range)
-    approach_threshold =2.0
+    approach_threshold =2.7
     
     if forward_distance > approach_threshold and left_distance > approach_threshold and right_distance > approach_threshold:
         move_flag = True
     else:
-        # Get where the robot is pointing to
-        orientation = robot_position.pose.pose.orientation
-        
-        # Convert the orientation to Euler angles
-        (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        if yaw <= 0:
+        if left_range <= approach_threshold:
+            desired_angular_vel = -0.01
+        elif right_range <= approach_threshold:
             desired_angular_vel = 0.01
         else:
-            desired_angular_vel = -0.01
+            print("obstacle in front")
+        
+        # # Get where the robot is pointing to
+        # orientation = robot_position.pose.pose.orientation
+        
+        # # Convert the orientation to Euler angles
+        # (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+        # if yaw <= 0:
+        #     desired_angular_vel = 0.01
+        # else:
+        #     desired_angular_vel = -0.01
         move_flag = False
 
     print(f'Distance to wall (forward): {forward_distance}')
     print(f'Distance to wall (left): {left_distance}')
     print(f'Distance to wall (right): {right_distance}')
-    # if distance_to_wall > approach_threshold:
-        
-        
-    #     move_flag = True
-    # else:
-    #     #get where robot is pointing to
-    #     orientation = robot_position.pose.pose.orientation
-        
-    #     # Convert the orientation to Euler angles
-    #     (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-    #     if yaw <=0:
-    #         desired_angular_vel = 0.01
-    #     elif yaw >= 0:
-    #         desired_angular_vel = -0.01
-    #     move_flag = False
-
-    # print(f'Distance to wall: {distance_to_wall}')
+    
 
     return move_flag  
 
@@ -282,30 +273,38 @@ def act(robot_vel_publisher, move_flag, robot_position):
         robot_vel_publisher.publish(robot_vel)
         rospy.sleep(1)
             
-        # #turns away from obstacle
-        # robot_vel.linear.x = 0.0
-        # robot_vel.angular.z = desired_angular_vel
-        # robot_vel_publisher.publish(robot_vel)
-        # rospy.sleep(1)
+        #turns away from obstacle
+        robot_vel.linear.x = 0.0
+        robot_vel.angular.z = desired_angular_vel
+        robot_vel_publisher.publish(robot_vel)
+        rospy.sleep(1)
         
         
-        # #stops
-        # robot_vel.linear.x = 0.0
-        # robot_vel.angular.z = 0.0
-        # robot_vel_publisher.publish(robot_vel)
-        # rospy.sleep(1)
+        #stops
+        robot_vel.linear.x = 0.0
+        robot_vel.angular.z = 0.0
+        robot_vel_publisher.publish(robot_vel)
+        rospy.sleep(1)
             
         #keeps turning till it is away from obstacle
-        # scan_lidar = sensor_lidar()
-        # move_flag_again = think(scan_lidar)
+        scan_lidar = sensor_lidar()
+        move_flag_again = think(scan_lidar)
             
-        # while not move_flag_again:
-        #     #turns away from obstacle
-        #     robot_vel.linear.x = 0.0
-        #     robot_vel.angular.z = desired_angular_vel
-        #     robot_vel_publisher.publish(robot_vel)
-        #     rospy.sleep(1)
-            
+        while not move_flag_again:
+            #turns away from obstacle
+            robot_vel.linear.x = 0.0
+            robot_vel.angular.z = desired_angular_vel
+            robot_vel_publisher.publish(robot_vel)
+            rospy.sleep(1)
+        
+        
+        #stops
+        robot_vel.linear.x = 0.0
+        robot_vel.angular.z = 0.0
+        robot_vel_publisher.publish(robot_vel)
+        rospy.sleep(10)
+        
+        #continue moving
         # robot_vel.linear.x = fwd_vel
         # robot_vel.angular.z = 0.0
         msg = "Robot turned! because of obstacle \n"
