@@ -96,10 +96,51 @@ def left_camera():
     scan_data = rospy.wait_for_message('/left_camera/image_raw', Image)
     return scan_data
 
+def estimate_distance(cv_image):
+    # Convert the image to HSV color space
+    hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+    
+    # Define the lower and upper bounds for green color in HSV
+    lower_green = np.array([40, 50, 50])  # Adjust these values based on your specific shade of green
+    upper_green = np.array([80, 255, 255])  # Adjust these values based on your specific shade of green
+    
+    # Threshold the image to extract green regions
+    mask = cv2.inRange(hsv_image, lower_green, upper_green)
+    
+    # Apply morphological operations (optional) to remove noise or fill gaps
+    kernel = np.ones((5, 5), np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    
+    # Find contours of the green regions
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Perform distance estimation based on the contours
+    # You can implement your own distance estimation algorithm here
+    
+    # For demonstration purposes, let's assume a constant focal length and object size
+    focal_length = 100  # Focal length in pixels
+    object_size = 10  # Object size in centimeters
+    
+    # Estimate the distance using simple geometry (assuming pinhole camera model)
+    distance = (object_size * focal_length) / cv2.contourArea(contours[0])
+    
+    return distance
+
 def right_camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
-    return scan_data
+    bridge = CvBridge()
+    cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
 
+    # Perform image processing and distance estimation
+    distance = estimate_distance(cv_image)
+    print("image_distance"+ str(distance))
+    print("-----------------")
+    # Display the image and distance
+    cv2.imshow("Camera Image", cv_image)
+    print("Estimated Distance:", distance)
+    cv2.waitKey(1)
+    
+    
 def right_camera_info():
     scan_data = rospy.wait_for_message('/right_camera/camera_info', CameraInfo)
     return scan_data
