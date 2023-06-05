@@ -79,9 +79,11 @@ point6 = mean_average(gps_to_cartesian(peg_07_lat, peg_07_lon), gps_to_cartesian
 goal_location_lat = rospy.get_param('goal_latitude')
 goal_location_log = rospy.get_param('goal_longitude')
 goal_location = gps_to_cartesian(goal_location_lat, goal_location_log)
-all_points = [point2, point3, point4, point4, point5, goal_location]
-current_index_target = 0
+all_points = [point1, point2, point3, point4, point4, point5, goal_location]
+prev_index_target = 0
+current_index_target = 1
 current_location = all_points[current_index_target]
+prev_location = all_points[prev_index_target]
 main_goal_met = False
 desired_angular_vel = 0.0
 
@@ -173,21 +175,34 @@ def calculate_desired_heading(current_lat, current_lon):
     desired_heading = math.atan2(delta_lon_rad, delta_lat_rad)
 
     return desired_heading
-    
+
+def distance_between_two_points(pointA, pointB):
+    # Calculate the distance between two states - we are only interested in the x and y coordinates
+    return ((pointA[0] - pointB[0]) ** 2 + (pointA[1] - pointB[2]) ** 2) ** 0.5
+
+
 def current_goal_is_met(robot_position):
-    global current_location, current_index_target, desired_angular_vel
+    global current_location,prev_index_target, prev_location, current_index_target, desired_angular_vel
     print(robot_position)
     print(current_location)
     print("--------------------")
-    if((robot_position[0] >= current_location[0]) and (robot_position[1] >= current_location[1])):
+    initial_point_final = distance_between_two_point(prev_location, current_location)
+    robot_goal = distance_betwen_two_point(robot_position, current_location)
+    robot_initial = distance_betwen_two_point(robot_position, prev_location)
+    print(initial_point_final)
+    print(robot_goal)
+    print("-----------------")
+    if((robot_initial >= initial_point_final)):
         if current_index_target == 6:
             main_goal_met = True
             return True
         else:
             current_index_target = current_index_target + 1
+            prev_index_target = prev_index_target + 1
+            prev_location = all_points[prev_index_target]
             current_location = all_points[current_index_target]
-            desired_heading = calculate_desired_heading(robot_position[0], robot_position[1])
-            desired_angular_vel = desired_heading
+            # desired_heading = calculate_desired_heading(robot_position[0], robot_position[1])
+            # desired_angular_vel = desired_heading
             return True
     else:
         return False
