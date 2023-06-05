@@ -97,7 +97,7 @@ def left_camera():
     return scan_data
 
 def estimate_distance(cv_image, focal):
-# Convert the image to grayscale
+    # Convert the image to grayscale
     gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
     # Apply a threshold to convert the grayscale image to binary
     COLOR_MIN = (39, 106, 124)
@@ -106,28 +106,31 @@ def estimate_distance(cv_image, focal):
     # Find contours of the binary image
     contours, _ = cv2.findContours(thresh_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    min_contour_area = 100  # Adjust this threshold based on your specific application
-    contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_contour_area]
+    min_distance = float('inf')
     
-    if len(contours) > 0:
-        largest_contour = max(contours, key=cv2.contourArea)
-        # Calculate the bounding rectangle of the largest contour
-        x, y, w, h = cv2.boundingRect(largest_contour)
+    for contour in contours:
+        # Calculate the bounding rectangle of the contour
+        x, y, w, h = cv2.boundingRect(contour)
         
-        # Estimate the object size as the maximum of width and height of the bounding rectangle
-        object_size = max(w, h)
-        
-        # Perform distance estimation based on the object size and focal length
+        # Calculate the distance to the contour using the bounding rectangle
         focal_length = focal.K[0] if focal.K[0] != 0 else 100  # Focal length in pixels (default to 100 if unknown)
-        distance = (object_size * focal_length) / w  # Convert to meters (adjust scaling factor based on units)
+        distance = (w * focal_length) / w  # Convert to meters (adjust scaling factor based on units)
         
-        print("image distance:", distance)
-        if distance < 0.1:
-            # Perform obstacle avoidance actions
-            # Example: Stop the robot, change direction, etc.
-            print("Obstacle detected. Taking avoidance action.")
-            return True
+        # Update the minimum distance if the current distance is smaller
+        if distance < min_distance:
+            min_distance = distance
+    
+    print("Minimum distance:", min_distance)
+    
+    # Check if the minimum distance is below the obstacle distance threshold
+    if min_distance < 0.1:
+        # Perform obstacle avoidance actions
+        # Example: Stop the robot, change direction, etc.
+        print("Obstacle detected. Taking avoidance action.")
+        return True
+    
     return False
+
 
 def right_camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
