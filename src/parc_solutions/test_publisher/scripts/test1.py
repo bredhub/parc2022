@@ -81,9 +81,10 @@ goal_location_log = rospy.get_param('goal_longitude')
 goal_location = gps_to_cartesian(goal_location_lat, goal_location_log)
 all_points = [point2, point3, point4, point4, point5, goal_location]
 current_index_target = 0
-current_goal = all_points[current_index_target]
+current_location = all_points[current_index_target]
 main_goal_met = False
 desired_angular_vel = 0.0
+
 
 def sensor_lidar():
     scan_data = rospy.wait_for_message('/scan', LaserScan)
