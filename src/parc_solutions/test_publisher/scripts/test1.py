@@ -132,40 +132,33 @@ def gps():
     x, y = gps_to_cartesian(current_lat, current_lon)
     return [x, y]
 
-def think(scan_data, robot_position = None):
+def think(scan_data, robot_position=None):
     forward_range = scan_data.ranges[180:270]
     left_range = scan_data.ranges[90:180]
     right_range = scan_data.ranges[270:360]
     forward_distance = sum(forward_range) / len(forward_range)
     left_distance = sum(left_range) / len(left_range)
     right_distance = sum(right_range) / len(right_range)
-    approach_threshold =2.7
+    approach_threshold = 5
     
-    if forward_distance > approach_threshold and left_distance > approach_threshold and right_distance > approach_threshold:
+    if math.isinf(forward_distance) or math.isinf(left_distance) or math.isinf(right_distance):
+        # Distance to obstacle is infinity, move towards the goal
         move_flag = True
     else:
-        if left_distance <= approach_threshold:
-            desired_angular_vel = -0.07
-        elif right_distance <= approach_threshold:
-            desired_angular_vel = 0.07
+        if forward_distance > approach_threshold and left_distance > approach_threshold and right_distance > approach_threshold:
+            # No obstacles, move towards the goal
+            move_flag = True
         else:
-            print("obstacle in front")
-        
-        # # Get where the robot is pointing to
-        # orientation = robot_position.pose.pose.orientation
-        
-        # # Convert the orientation to Euler angles
-        # (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        # if yaw <= 0:
-        #     desired_angular_vel = 0.01
-        # else:
-        #     desired_angular_vel = -0.01
-        move_flag = False
+            # Obstacle detected, turn away from it
+            if left_distance <= approach_threshold:
+                desired_angular_vel = -0.07  # Turn right
+            elif right_distance <= approach_threshold:
+                desired_angular_vel = 0.07  # Turn left
+            move_flag = False
 
     print(f'Distance to wall (forward): {forward_distance}')
     print(f'Distance to wall (left): {left_distance}')
     print(f'Distance to wall (right): {right_distance}')
-    
 
     return move_flag  
 
@@ -271,20 +264,20 @@ def act(robot_vel_publisher, move_flag, robot_position):
         robot_vel.linear.x = 0.0
         robot_vel.angular.z = 0.0
         robot_vel_publisher.publish(robot_vel)
-        rospy.sleep(1)
+        rospy.sleep(5)
             
         #turns away from obstacle
         robot_vel.linear.x = 0.0
         robot_vel.angular.z = desired_angular_vel
         robot_vel_publisher.publish(robot_vel)
-        rospy.sleep(1)
+        rospy.sleep(2)
         
         
         #stops
         robot_vel.linear.x = 0.0
         robot_vel.angular.z = 0.0
         robot_vel_publisher.publish(robot_vel)
-        rospy.sleep(1)
+        rospy.sleep(5)
             
         #keeps turning till it is away from obstacle
         scan_lidar = sensor_lidar()
