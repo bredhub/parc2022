@@ -134,15 +134,15 @@ def right_camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
     return scan_data
 
-def analyse_image(scan_data, camera_info, side):
+def analyse_image(scan_data, camera_info):
     if camera_info is None:
         rospy.logwarn('Camera info not available yet.')
-        return None
+        return False
     
     try:
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
-        
+        turn = False
         
         # Perform image processing and distance estimation
         distance = estimate_distance(cv_image, camera_info.K[0])
@@ -152,9 +152,13 @@ def analyse_image(scan_data, camera_info, side):
         cv2.imshow("Camera Image", cv_image)
         print("Estimated Distance:", distance)
         cv2.waitKey(1)
+        if distance < 0.09:
+            turn = True
+            
+        return turn
     except Exception as e:
             rospy.logerr(f"Error processing image: {str(e)}")
-    
+            return False
     
 def right_camera_info():
     scan_data = rospy.wait_for_message('/right_camera/camera_info', CameraInfo)
@@ -268,12 +272,16 @@ def current_goal_is_met(robot_position):
         
     
     
-def act(robot_vel_publisher, move_flag, robot_position):
+def act(robot_vel_publisher, move_flag, robot_position, right_call, left_call):
     global desired_angular_vel
     
     robot_vel = Twist()
     fwd_vel = 0.2
     
+    if right_call:
+        print("move left")
+    elif left_call:
+        print("move right")
     if move_flag:
         if current_goal_is_met(robot_position):
             if main_goal_met:
@@ -388,13 +396,16 @@ def main():
         position_robot = odom()
         
         #sense item by right
-        right_call = analyse_image(right_camera_scan, right_info, "right")
+        right_call = analyse_image(right_camera_scan, right_info)
+        
+        #sense item by left
+        left_call = analyse_image(left_camera_scan, left_info)
         
         #think
         move_flag = think(scan_lidar, position_robot)
         
         #act
-        message = act(robot_vel_publisher, move_flag, robot_position)
+        message = act(robot_vel_publisher, move_flag, robot_position, right_call, left_call)
     
         
         print(f'At time []: {message}!')
