@@ -96,13 +96,14 @@ def left_camera():
     scan_data = rospy.wait_for_message('/left_camera/image_raw', Image)
     return scan_data
 
-def estimate_distance(cv_image):
+
+def estimate_distance(cv_image, focal):
     # Convert the image to HSV color space
     hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
     
     # Define the lower and upper bounds for green color in HSV
-    lower_green = np.array([40, 50, 50])  # Adjust these values based on your specific shade of green
-    upper_green = np.array([80, 255, 255])  # Adjust these values based on your specific shade of green
+    lower_green = np.array([39, 106, 124])  # Adjust these values based on your specific shade of green
+    upper_green = np.array([77, 237, 189])  # Adjust these values based on your specific shade of green
     
     # Threshold the image to extract green regions
     mask = cv2.inRange(hsv_image, lower_green, upper_green)
@@ -116,9 +117,12 @@ def estimate_distance(cv_image):
     
     # Perform distance estimation based on the contours
     # You can implement your own distance estimation algorithm here
-    
+    focal_length = 100
     # For demonstration purposes, let's assume a constant focal length and object size
-    focal_length = 100  # Focal length in pixels
+    if msg.K[0] != 0:
+        focal_length = focal  # Focal length in pixels
+        rospy.loginfo(f"Focal length: {focal_length}")
+        
     object_size = 10  # Object size in centimeters
     
     # Estimate the distance using simple geometry (assuming pinhole camera model)
@@ -128,17 +132,28 @@ def estimate_distance(cv_image):
 
 def right_camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
-    bridge = CvBridge()
-    cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
+    return scan_data
 
-    # Perform image processing and distance estimation
-    distance = estimate_distance(cv_image)
-    print("image_distance"+ str(distance))
-    print("-----------------")
-    # Display the image and distance
-    cv2.imshow("Camera Image", cv_image)
-    print("Estimated Distance:", distance)
-    cv2.waitKey(1)
+def analyse_image(scan_data, camera_info, side):
+    if camera_info is None:
+        rospy.logwarn('Camera info not available yet.')
+        return None
+    
+    try:
+        bridge = CvBridge()
+        cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
+        
+        
+        # Perform image processing and distance estimation
+        distance = estimate_distance(cv_image, camera_info.K[0])
+        print("image_distance"+ str(distance))
+        print("-----------------")
+        # Display the image and distance
+        cv2.imshow("Camera Image", cv_image)
+        print("Estimated Distance:", distance)
+        cv2.waitKey(1)
+    except Exception as e:
+            rospy.logerr(f"Error processing image: {str(e)}")
     
     
 def right_camera_info():
