@@ -124,7 +124,7 @@ def estimate_distance(cv_image, focal):
         # Perform distance estimation based on the object size and focal length
         # You can implement your own distance estimation algorithm here
         focal_length = focal.K[0] if focal.K[0] != 0 else 100  # Focal length in pixels (default to 100 if unknown)
-        distance = (object_size * focal_length) / 1000  # Convert to meters (adjust scaling factor based on units)
+        distance = (object_size * focal_length) / w  # Convert to meters (adjust scaling factor based on units)
         
         print("image distance" + str(distance))
         return distance
