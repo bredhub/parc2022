@@ -100,6 +100,7 @@ def left_camera():
 def estimate_distance(cv_image, focal):
     # Convert the image to grayscale
     gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite("gray_image.jpg", gray_image)
     cv2.imshow("Gray Image", gray_image)
     cv2.waitKey(1)
     # Apply a threshold to convert the grayscale image to binary
