@@ -1,0 +1,7 @@
+rosshutdown
+rosinit  
+
+subImage = rossubscriber("/right_camera/image_raw",'DataFormat')
+[msg2, status, statusText] = receive(subImage, 10)
+imageFormatted = rosReadImage(msg2)
+imshow(imageFormatted)
