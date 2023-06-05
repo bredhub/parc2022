@@ -323,45 +323,44 @@ def act(robot_vel_publisher, move_flag, robot_position, right_call, left_call):
         robot_vel.linear.x = 0.0
         robot_vel.angular.z = 0.0
         robot_vel_publisher.publish(robot_vel)
-        rospy.sleep(5)
+        print("stops to turn")
+        rospy.sleep(1)
             
         #turns away from obstacle
         robot_vel.linear.x = 0.0
         robot_vel.angular.z = desired_angular_vel
         robot_vel_publisher.publish(robot_vel)
-        rospy.sleep(2)
+        print("turns away from obstacle")
+        rospy.sleep(1)
         
         
         #stops
         robot_vel.linear.x = 0.0
         robot_vel.angular.z = 0.0
         robot_vel_publisher.publish(robot_vel)
-        rospy.sleep(5)
+        print("stops")
+        rospy.sleep(1)
             
-        #keeps turning till it is away from obstacle
-        scan_lidar = sensor_lidar()
-        move_flag_again = think(scan_lidar)
+        # #keeps turning till it is away from obstacle
+        # scan_lidar = sensor_lidar()
+        # move_flag_again = think(scan_lidar)
             
-        while not move_flag_again:
-            print("checking again")
-            #turns away from obstacle
-            robot_vel.linear.x = 0.0
-            robot_vel.angular.z = desired_angular_vel
-            robot_vel_publisher.publish(robot_vel)
-            rospy.sleep(1)
+        # while not move_flag_again:
+        #     print("checking again")
+        #     #turns away from obstacle
+        #     robot_vel.linear.x = 0.0
+        #     robot_vel.angular.z = desired_angular_vel
+        #     robot_vel_publisher.publish(robot_vel)
+        #     rospy.sleep(1)
         
         
-        #stops
-        robot_vel.linear.x = 0.0
-        robot_vel.angular.z = 0.0
-        robot_vel_publisher.publish(robot_vel)
-        rospy.sleep(10)
+        
         
         #continue moving
-        # robot_vel.linear.x = fwd_vel
-        # robot_vel.angular.z = 0.0
+        robot_vel.linear.x = fwd_vel
+        robot_vel.angular.z = 0.0
         msg = "Robot turned! because of obstacle \n"
-        # robot_vel_publisher.publish(robot_vel)
+        robot_vel_publisher.publish(robot_vel)
      
     return msg
     
