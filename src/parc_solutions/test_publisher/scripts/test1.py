@@ -107,22 +107,26 @@ def estimate_distance(cv_image, focal):
     # Find contours of the binary image
     contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    if len(contours) > 0:
-        # Calculate the area of the largest contour
-        max_area = max(cv2.contourArea(cnt) for cnt in contours)
-        
-        # Perform distance estimation based on the contours
-        focal_length = 100
-        # For demonstration purposes, let's assume a constant focal length and object size
-        if focal.K[0] != 0:
-            focal_length = focal.K[0]  # Focal length in pixels
-            rospy.loginfo(f"Focal length: {focal_length}")
-        
-        object_size = 10  # Object size in centimeters
-        print("image area: " + str(max_area))
-        # Estimate the distance using simple geometry (assuming pinhole camera model)
-        distance = (object_size * focal_length) / math.sqrt(max_area)
     
+    min_contour_area = 100  # Adjust this threshold based on your specific application
+    contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_contour_area]
+    
+    if len(contours) > 0:
+        
+        largest_contour = max(contours, key=cv2.contourArea)
+        # Calculate the area of the largest contour
+        # Calculate the bounding rectangle of the largest contour
+        x, y, w, h = cv2.boundingRect(largest_contour)
+        
+        # Estimate the object size as the maximum of width and height of the bounding rectangle
+        object_size = max(w, h)
+        
+        # Perform distance estimation based on the object size and focal length
+        # You can implement your own distance estimation algorithm here
+        focal_length = focal.K[0] if focal.K[0] != 0 else 100  # Focal length in pixels (default to 100 if unknown)
+        distance = (object_size * focal_length) / 1000  # Convert to meters (adjust scaling factor based on units)
+        
+        print("image distance" + str(distance))
         return distance
     
     return None
