@@ -178,7 +178,7 @@ def calculate_desired_heading(current_lat, current_lon):
 
 def distance_between_two_point(pointA, pointB):
     # Calculate the distance between two states - we are only interested in the x and y coordinates
-    return ((pointA[0] - pointB[0]) ** 2 + (pointA[1] - pointB[2]) ** 2) ** 0.5
+    return ((pointA[0] - pointB[0]) ** 2 + (pointA[1] - pointB[1]) ** 2) ** 0.5
 
 
 def current_goal_is_met(robot_position):
