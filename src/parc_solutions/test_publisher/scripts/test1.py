@@ -139,7 +139,7 @@ def think(scan_data, robot_position):
     forward_distance = sum(forward_range) / len(forward_range)
     left_distance = sum(left_range) / len(left_range)
     right_distance = sum(right_range) / len(right_range)
-    approach_threshold = 0.1
+    approach_threshold =2.0
     
     if forward_distance > approach_threshold and left_distance > approach_threshold and right_distance > approach_threshold:
         move_flag = True
