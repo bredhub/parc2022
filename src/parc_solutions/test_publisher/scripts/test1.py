@@ -101,7 +101,7 @@ def estimate_distance(cv_image, focal):
     # Convert the image to grayscale
     gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
     cv2.imwrite("gray_image.jpg", gray_image)
-    cv2.imshow("Gray Image", gray_image)
+    # cv2.imshow("Gray Image", gray_image)
     cv2.waitKey(1)
     # Apply a threshold to convert the grayscale image to binary
     _, binary_image = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -407,10 +407,10 @@ def main():
         #front camera
         front_call = analyse_image(camera_scan, right_info)
         #sense item by right
-        right_call = analyse_image(right_camera_scan, right_info)
+        # right_call = analyse_image(right_camera_scan, right_info)
         
-        #sense item by left
-        left_call = analyse_image(left_camera_scan, left_info)
+        # #sense item by left
+        # left_call = analyse_image(left_camera_scan, left_info)
         
         #think
         move_flag = think(scan_lidar, position_robot)
