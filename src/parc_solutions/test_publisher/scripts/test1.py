@@ -309,7 +309,9 @@ def main():
         message = act(robot_vel_publisher, move_flag, robot_position)
     
         
-        
+        print(f'At time []: {message}!')
+
+        rate.sleep()
     
 
        
