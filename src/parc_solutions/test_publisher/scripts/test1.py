@@ -393,10 +393,10 @@ def main():
         #front camera
         front_call = analyse_image(camera_scan, right_info)
         #sense item by right
-        # right_call = analyse_image(right_camera_scan, right_info)
+        right_call = analyse_image(right_camera_scan, right_info)
         
         # #sense item by left
-        # left_call = analyse_image(left_camera_scan, left_info)
+        left_call = analyse_image(left_camera_scan, left_info)
         
         #think
         move_flag = think(scan_lidar, position_robot)
