@@ -387,6 +387,9 @@ def main():
         #where the robot is facing
         position_robot = odom()
         
+        #sense item by right
+        right_call = analyse_image(right_camera_scan, right_info, "right")
+        
         #think
         move_flag = think(scan_lidar, position_robot)
         
