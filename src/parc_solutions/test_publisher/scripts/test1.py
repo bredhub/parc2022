@@ -176,6 +176,9 @@ def calculate_desired_heading(current_lat, current_lon):
     
 def current_goal_is_met(robot_position):
     global current_location, current_index_target, desired_angular_vel
+    print(robot_position)
+    print(current_location)
+    print("--------------------")
     if((robot_position[0] >= current_location[0]) and (robot_position[1] >= current_location[1])):
         if current_index_target == 6:
             main_goal_met = True
