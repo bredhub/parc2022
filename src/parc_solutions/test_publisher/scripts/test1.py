@@ -197,12 +197,13 @@ def think(scan_data, robot_position=None):
     # forward_distance = sum(forward_range) / len(forward_range)
     # left_distance = sum(left_range) / len(left_range)
     # right_distance = sum(right_range) / len(right_range)
-    approach_threshold = 0.166
+    approach_threshold = 0.161
     min_range = min(scan_data.ranges)
     
     print("min rane"+ str(min_range))
     if min_range > approach_threshold:
         # Distance to obstacle is infinity, move towards the goal
+        desired_angular_vel = 0.0
         move_flag = True
     else:
         orientation = robot_position.pose.pose.orientation
@@ -210,9 +211,9 @@ def think(scan_data, robot_position=None):
         print("faing"+ str(yaw))
         
         if yaw <= 0:
-            desired_angular_vel = 0.05
+            desired_angular_vel = 0.03
         elif yaw >= 0:
-            desired_angular_vel = -0.05
+            desired_angular_vel = -0.03
         
         move_flag = False
     return move_flag  
