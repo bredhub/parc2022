@@ -176,7 +176,7 @@ def calculate_desired_heading(current_lat, current_lon):
 
     return desired_heading
 
-def distance_between_two_points(pointA, pointB):
+def distance_between_two_point(pointA, pointB):
     # Calculate the distance between two states - we are only interested in the x and y coordinates
     return ((pointA[0] - pointB[0]) ** 2 + (pointA[1] - pointB[2]) ** 2) ** 0.5
 
