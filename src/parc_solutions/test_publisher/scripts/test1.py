@@ -137,6 +137,10 @@ def right_camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
     return scan_data
 
+def camera():
+    scan_data = rospy.wait_for_message('/camera/image_raw', Image)
+    return scan_data
+
 def analyse_image(scan_data, camera_info):
     if camera_info is None:
         rospy.logwarn('Camera info not available yet.')
@@ -387,6 +391,7 @@ def main():
         
         #sense
         scan_lidar = sensor_lidar()
+        camera_scan = camera()
         left_camera_scan = left_camera()
         right_camera_scan = right_camera()
         left_info = left_camera_info()
@@ -399,6 +404,8 @@ def main():
         #where the robot is facing
         position_robot = odom()
         
+        #front camera
+        front_call = analyse_image(camera_scan, right_info)
         #sense item by right
         right_call = analyse_image(right_camera_scan, right_info)
         
