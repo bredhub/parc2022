@@ -197,7 +197,9 @@ def think(scan_data, robot_position=None):
     left_distance = sum(left_range) / len(left_range)
     right_distance = sum(right_range) / len(right_range)
     approach_threshold = 5
+    min_range = min(scan_data.ranges)
     
+    print("min rane"+ str(min_range))
     if math.isinf(forward_distance) and math.isinf(left_distance) and math.isinf(right_distance):
         # Distance to obstacle is infinity, move towards the goal
         move_flag = True
