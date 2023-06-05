@@ -190,13 +190,14 @@ def gps():
     return [x, y]
 
 def think(scan_data, robot_position=None):
+    global desired_angular_vel
     # forward_range = scan_data.ranges[180:270]
     # left_range = scan_data.ranges[90:180]
     # right_range = scan_data.ranges[270:360]
     # forward_distance = sum(forward_range) / len(forward_range)
     # left_distance = sum(left_range) / len(left_range)
     # right_distance = sum(right_range) / len(right_range)
-    approach_threshold = 0.167
+    approach_threshold = 0.166
     min_range = min(scan_data.ranges)
     
     print("min rane"+ str(min_range))
@@ -342,6 +343,7 @@ def act(robot_vel_publisher, move_flag, robot_position, right_call, left_call):
         move_flag_again = think(scan_lidar)
             
         while not move_flag_again:
+            print("checking again")
             #turns away from obstacle
             robot_vel.linear.x = 0.0
             robot_vel.angular.z = desired_angular_vel
