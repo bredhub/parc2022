@@ -1,3 +1,4 @@
+
 % ROS initialization
 rosinit;
 
@@ -30,7 +31,7 @@ while true
     robotStatus = robotStatusMsg.Data;
     disp(robotStatus);
 
-    if strcmp(robotStatus, 'started')
+    if ~strcmp(robotStatus, 'finished')
         % Create a subscriber for GPS fix topic
         gpsFixSub = rossubscriber('/gps/fix', @gpsFixCallback);
 
@@ -100,6 +101,8 @@ end
 function cameraImage = processCameraImage(cameraMsg)
     % Extract the camera image data from the message
     cameraImage = cameraMsg.Data; 
+
+    imwrite(cameraImage, 'captured_image.jpg');
 end
 
 % Function to create threshold based on HSV values
