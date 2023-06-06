@@ -103,8 +103,14 @@ def left_camera():
     scan_data = rospy.wait_for_message('/left_camera/image_raw', Image)
     return scan_data
 
+def calculate_distance_to_blob(robot_position, blob_position):
+    robot_x, robot_y = robot_position
+    blob_x, blob_y = blob_position
 
-def estimate_distance(cv_image, focal):
+    distance = math.sqrt((blob_x - robot_x)**2 + (blob_y - robot_y)**2)
+    return distance
+
+def estimate_distance(cv_image, focal, robot_position):
     global keypoints
     # Convert the image to grayscale
     gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
@@ -138,11 +144,13 @@ def estimate_distance(cv_image, focal):
     print(keypoints)
     obstacle_detected = len(keypoints) > 0
     keypoints = keypoints
+    robot_x = robot_position[0]
     
+    robot_y = robot_position[1]
     obstacle_distances = []
     for keypoint in keypoints:
         blob_x, blob_y = keypoint.pt
-        distance_to_blob = math.sqrt(blob_x**2 + blob_y**2)
+        distance_to_blob = math.sqrt((blob_x - robot_x)**2 + (blob_y - robot_y)**2)
         obstacle_distances.append(distance_to_blob)
     print(obstacle_distances)
     print("obstacel")
@@ -166,7 +174,7 @@ def camera():
     scan_data = rospy.wait_for_message('/camera/image_raw', Image)
     return scan_data
 
-def analyse_image(scan_data, camera_info):
+def analyse_image(scan_data, camera_info, robot_position):
     if camera_info is None:
         rospy.logwarn('Camera info not available yet.')
         return False
@@ -177,7 +185,7 @@ def analyse_image(scan_data, camera_info):
         turn = False
         
         # Perform image processing and distance estimation
-        obstacle_detected = estimate_distance(cv_image, camera_info)
+        obstacle_detected = estimate_distance(cv_image, camera_info, robot_position)
         return obstacle_detected
     except Exception as e:
         rospy.logerr(f"Error processing image: {str(e)}")
@@ -217,12 +225,6 @@ def gps():
 
 def think(scan_data, robot_position=None):
     global desired_angular_vel
-    # forward_range = scan_data.ranges[180:270]
-    # left_range = scan_data.ranges[90:180]
-    # right_range = scan_data.ranges[270:360]
-    # forward_distance = sum(forward_range) / len(forward_range)
-    # left_distance = sum(left_range) / len(left_range)
-    # right_distance = sum(right_range) / len(right_range)
     approach_threshold = 0.161
     ranges = scan_data.ranges
     front_distance = min(ranges[int(len(ranges)/2-10):int(len(ranges)/2+10)])
@@ -457,12 +459,13 @@ def main():
         position_robot = odom()
         
         #front camera
-        front_call = analyse_image(camera_scan, right_info)
+        front_call = analyse_image(camera_scan, right_info, robot_position)
         #sense item by right
-        right_call = analyse_image(right_camera_scan, right_info)
+        right_call = analyse_image(right_camera_scan, right_info, )
+        right_call = analyse_image(right_camera_scan, right_info, robot_position)
         
         # #sense item by left
-        left_call = analyse_image(left_camera_scan, left_info)
+        left_call = analyse_image(left_camera_scan, left_info, robot_position)
         
         #think
         move_flag = think(scan_lidar, position_robot)
