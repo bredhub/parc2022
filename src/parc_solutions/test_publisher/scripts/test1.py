@@ -312,7 +312,7 @@ def act(robot_vel_publisher, move_flag, robot_position, right_call, left_call):
         
         #chnae direction
         robot_vel.linear.x = 0.0
-        robot_vel.angular.z = 0.07
+        robot_vel.angular.z = -0.07
         robot_vel_publisher.publish(robot_vel)
         rospy.sleep(1)
         
@@ -332,7 +332,7 @@ def act(robot_vel_publisher, move_flag, robot_position, right_call, left_call):
         
         #chnae direction
         robot_vel.linear.x = 0.0
-        robot_vel.angular.z = -0.07
+        robot_vel.angular.z = 0.07
         
         robot_vel_publisher.publish(robot_vel)
         rospy.sleep(1)
