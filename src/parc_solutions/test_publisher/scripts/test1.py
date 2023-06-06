@@ -151,7 +151,7 @@ def convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_leng
     world_frame_coordinates = rotation_matrix @ camera_frame_coordinates
     
     # Translate to camera position in the world frame
-    world_frame_coordinates += camera_position
+    world_frame_coordinates += np.array(camera_position)
     
     return world_frame_coordinates
 
