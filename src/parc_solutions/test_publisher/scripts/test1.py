@@ -470,7 +470,7 @@ def main():
         #think
         # move_flag = think(scan_lidar, position_robot)
         
-        move_flag = False
+        move_flag = True
         #act
         message = act(robot_vel_publisher, move_flag, robot_position, right_call, left_call)
     
