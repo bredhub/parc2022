@@ -151,9 +151,9 @@ def convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_leng
     _, _, yaw = euler_from_quaternion(quaternion)
 
     # Calculate world frame coordinates
-    world_frame_x = robot_position.x + camera_frame_x * np.cos(yaw) - camera_frame_y * np.sin(yaw)
-    world_frame_y = robot_position.y + camera_frame_x * np.sin(yaw) + camera_frame_y * np.cos(yaw)
-    world_frame_z = robot_position.z + camera_frame_z
+    world_frame_x = robot_position[0] + camera_frame_x * np.cos(yaw) - camera_frame_y * np.sin(yaw)
+    world_frame_y = robot_position[1] + camera_frame_x * np.sin(yaw) + camera_frame_y * np.cos(yaw)
+    world_frame_z = robot_position[2] + camera_frame_z
 
     return [world_frame_x, world_frame_y, world_frame_z]
 
