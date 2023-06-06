@@ -146,7 +146,8 @@ def convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_leng
     camera_frame_z = focal_length
 
     # Convert quaternion to rotation matrix
-    quaternion = (robot_orientation_quaternion.x, robot_orientation_quaternion.y, robot_orientation_quaternion.z, robot_orientation_quaternion.w)
+    quaternion = (robot_orientation_quaternion[0], robot_orientation_quaternion[1], robot_orientation_quaternion[2], robot_orientation_quaternion[3])
+
     _, _, yaw = euler_from_quaternion(quaternion)
 
     # Calculate world frame coordinates
