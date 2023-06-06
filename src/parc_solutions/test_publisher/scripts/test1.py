@@ -161,10 +161,11 @@ def analyse_image(scan_data, robot_position):
     #     rospy.logwarn('Camera info not available yet.')
     #     return False
     try:
-        print('OpenCV image data type:', type(scan_data.width))
-
+        print(scan_data.header)
+        print('OpenCV image data type:', str(scan_data.width))
+        image_width = scan_data.width
         # Image data shape
-        print(f'Image data shape: {scan_data.msg.data.shape}')
+        print(f'Image data shape: {scan_data.shape}')
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
         turn = False
