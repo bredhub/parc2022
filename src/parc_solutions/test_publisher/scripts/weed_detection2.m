@@ -43,7 +43,7 @@ while true
         
         % Capture left camera image
         leftCameraMsg = receive(leftCameraSub, 2);
-        leftCameraImage = processCameraImage(leftCameraMs);
+        leftCameraImage = processCameraImage(leftCameraMsg);
         
         % Capture ZED 2i camera image
         zedCameraMsg = receive(zedCameraSub, 2);
@@ -131,11 +131,13 @@ function transformedCoordinates = transformCoordinates(coordinates, robotPositio
     rotationMatrix = [cos(robotOrientation), -sin(robotOrientation); sin(robotOrientation), cos(robotOrientation)];
     
     % Apply the transformation to the coordinates
-    transformedCoordinates = (coordinates * rotationMatrix') + robotPosition;
+    transformedCoordinates = (coordinates * rotationMatrix) + robotPosition;
 end
 
 % Callback function for GPS data
-function gpsFixCallback(gpsFixMsg)
+function gpsFixCallback(~, gpsFixMsg)
+    % Declare the robotPosition variable as global
+    global robotPosition;
     % Extract the robot position from the GPS fix message
     robotPosition = [gpsFixMsg.Longitude; gpsFixMsg.Latitude];
 end

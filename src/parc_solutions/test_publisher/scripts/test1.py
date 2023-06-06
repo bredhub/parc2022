@@ -468,9 +468,9 @@ def main():
         left_call = analyse_image(left_camera_scan, left_info, robot_position)
         
         #think
-        # move_flag = think(scan_lidar, position_robot)
+        move_flag = think(scan_lidar, position_robot)
         
-        move_flag = True
+        # move_flag = True
         #act
         message = act(robot_vel_publisher, move_flag, robot_position, right_call, left_call)
     
