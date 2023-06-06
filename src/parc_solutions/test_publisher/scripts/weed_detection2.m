@@ -24,6 +24,8 @@ COLOR_MAX = [37/360, 255/255, 217/255];
 
 % ROS loop
 while true
+    % Create a subscriber to /parc_robot/robot_status topic
+robotStatusSub = rossubscriber('/parc_robot/robot_status', 'std_msgs/String');
     % Receive robot status message
     robotStatusMsg = receive(robotStatusSub);
     robotStatus = robotStatusMsg.Data;
