@@ -101,17 +101,64 @@ def gps():
     x, y = gps_to_cartesian(current_lat, current_lon)
     return [x, y]
 
-def convert_to_cartesian(pixel_coordinate, image_size, focal_length):
-    # Convert pixel coordinate to normalized coordinate (-1 to 1)
-    normalized_coordinate = (pixel_coordinate - (image_size / 2)) / (image_size / 2)
+def euler_to_rotation_matrix(roll, pitch, yaw):
+    # Convert Euler angles to rotation matrix
+    rotation_matrix = np.zeros((3, 3))
     
-    # Convert normalized coordinate to Cartesian coordinate
-    cartesian_coordinate = normalized_coordinate * focal_length
+    # Roll, pitch, and yaw are in radians
+    cos_roll = np.cos(roll)
+    sin_roll = np.sin(roll)
+    cos_pitch = np.cos(pitch)
+    sin_pitch = np.sin(pitch)
+    cos_yaw = np.cos(yaw)
+    sin_yaw = np.sin(yaw)
     
-    return cartesian_coordinate
+    rotation_matrix[0, 0] = cos_yaw * cos_pitch
+    rotation_matrix[0, 1] = cos_yaw * sin_pitch * sin_roll - sin_yaw * cos_roll
+    rotation_matrix[0, 2] = cos_yaw * sin_pitch * cos_roll + sin_yaw * sin_roll
+    rotation_matrix[1, 0] = sin_yaw * cos_pitch
+    rotation_matrix[1, 1] = sin_yaw * sin_pitch * sin_roll + cos_yaw * cos_roll
+    rotation_matrix[1, 2] = sin_yaw * sin_pitch * cos_roll - cos_yaw * sin_roll
+    rotation_matrix[2, 0] = -sin_pitch
+    rotation_matrix[2, 1] = cos_pitch * sin_roll
+    rotation_matrix[2, 2] = cos_pitch * cos_roll
+    
+    return rotation_matrix
+
+def calculate_rotation_matrix(camera_orientation_quaternion):
+    # Convert quaternion to Euler angles
+    camera_orientation_euler = euler_from_quaternion(camera_orientation_quaternion)
+    roll, pitch, yaw = camera_orientation_euler
+    
+    # Calculate rotation matrix from Euler angles
+    rotation_matrix = euler_to_rotation_matrix(roll, pitch, yaw)
+    
+    return rotation_matrix
+
+def convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_length, camera_position, camera_orientation_quaternion):
+    # Convert blob coordinates to normalized image coordinates
+    normalized_x = (blob_x - (image_width / 2)) / (image_width / 2)
+    normalized_y = (blob_y - (image_height / 2)) / (image_height / 2)
+    
+    # Convert to camera frame coordinates
+    camera_frame_x = normalized_x * focal_length
+    camera_frame_y = normalized_y * focal_length
+    camera_frame_z = focal_length
+    
+    # Rotate camera frame coordinates to align with the world frame
+    rotation_matrix = calculate_rotation_matrix(camera_orientation_quaternion)
+    camera_frame_coordinates = np.array([camera_frame_x, camera_frame_y, camera_frame_z])
+    world_frame_coordinates = rotation_matrix @ camera_frame_coordinates
+    
+    # Translate to camera position in the world frame
+    world_frame_coordinates += camera_position
+    
+    return world_frame_coordinates
 
 
-def estimate_distance(cv_image, robot_position, image_width):
+
+
+def estimate_distance(cv_image, robot_position, image_width, image_height, camera_orientation_quaternion):
     global keypoints
     focal_length = 288
     # Convert the image to grayscale
@@ -152,12 +199,11 @@ def estimate_distance(cv_image, robot_position, image_width):
     obstacle_distances = []
     for keypoint in keypoints:
         blob_x, blob_y = keypoint.pt
-        cartesian_x = convert_to_cartesian(blob_x, image_width, focal_length)
-        cartesian_y = convert_to_cartesian(blob_y, image_width, focal_length)
-
-        # Calculate distance to blob using Cartesian coordinates
-        distance_to_blob = math.sqrt((cartesian_x - robot_x) ** 2 + (cartesian_y - robot_y) ** 2)
-        obstacle_distances.append(distance_to_blob)
+        world_frame_coordinates = convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_length,
+                                                         robot_position, camera_orientation_quaternion)
+        
+        distance_to_robot = math.sqrt((world_frame_coordinates[0] - robot_x) ** 2 + (world_frame_coordinates[1] - robot_y) ** 2)
+        obstacle_distances.append(distance_to_robot)
     print(obstacle_distances)
     # print("obstacel")
     if obstacle_detected:
@@ -171,18 +217,24 @@ def estimate_distance(cv_image, robot_position, image_width):
     
     # return False
 
-def analyse_image(scan_data, robot_position):
+def analyse_image(scan_data, robot_position, odom_position):
     # if camera_info is None:
     #     rospy.logwarn('Camera info not available yet.')
     #     return False
     try:
+        orientation = data.pose.pose.orientation
+        
+        # Convert the orientation to Euler angles
+        (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+        quaternion = tf.quaternion_from_euler(roll, pitch, yaw)
         image_width = scan_data.width
+        image_height = scan_data.height
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
         turn = False
         
         # Perform image processing and distance estimation
-        obstacle_detected = estimate_distance(cv_image, robot_position, image_width)
+        obstacle_detected = estimate_distance(cv_image, robot_position, image_width, image_height, quaternion)
         return obstacle_detected
     except Exception as e:
         rospy.logerr(f"Error processing image: {str(e)}")
@@ -227,7 +279,7 @@ def main():
         position_robot = odom()
         
         #front camera
-        front_call = analyse_image(camera_scan, robot_position)
+        front_call = analyse_image(camera_scan, robot_position, position_robot)
         
         
         message = act(robot_vel_publisher,  robot_position)
