@@ -222,24 +222,24 @@ def analyse_image(scan_data, robot_position, odom_position):
     # if camera_info is None:
     #     rospy.logwarn('Camera info not available yet.')
     #     return False
-    try:
-        orientation = odom_position.pose.pose.orientation
-        
-        # Convert the orientation to Euler angles
-        (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        quaternion = quaternion_from_euler(roll, pitch, yaw)
-        image_width = scan_data.width
-        image_height = scan_data.height
-        bridge = CvBridge()
-        cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
-        turn = False
-        
-        # Perform image processing and distance estimation
-        obstacle_detected = estimate_distance(cv_image, robot_position, image_width, image_height, quaternion)
-        return obstacle_detected
-    except Exception as e:
-        rospy.logerr(f"Error processing image: {str(e)}")
-        return False
+    # try:
+    orientation = odom_position.pose.pose.orientation
+    
+    # Convert the orientation to Euler angles
+    (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+    quaternion = quaternion_from_euler(roll, pitch, yaw)
+    image_width = scan_data.width
+    image_height = scan_data.height
+    bridge = CvBridge()
+    cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
+    turn = False
+    
+    # Perform image processing and distance estimation
+    obstacle_detected = estimate_distance(cv_image, robot_position, image_width, image_height, quaternion)
+    return obstacle_detected
+    # except Exception as e:
+    #     rospy.logerr(f"Error processing image: {str(e)}")
+    #     return False
 
 def camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
