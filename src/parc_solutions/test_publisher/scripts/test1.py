@@ -14,7 +14,7 @@ from cv_bridge import CvBridge
 from geometry_msgs.msg import Pose, Twist
 from nav_msgs.msg import Odometry
 from parc_robot.gps2cartesian import gps_to_cartesian
-from sensor_msgs.msg import (CameraInfo, Image, LaserScan, NavSatFix,
+from sensor_msgs.msg import (CameraInfo, Image, Imu, LaserScan, NavSatFix,
                              PointCloud2)
 from tf.transformations import euler_from_quaternion
 
@@ -86,42 +86,66 @@ current_location = all_points[current_index_target]
 prev_location = all_points[prev_index_target]
 main_goal_met = False
 desired_angular_vel = 0.0
+current_orientation = None
+keypoints = []
+last_image = None
 
 
 def sensor_lidar():
     scan_data = rospy.wait_for_message('/scan', LaserScan)
     return scan_data
 
+def sensor_zed():
+    scan_data = rospy.wait_for_message('/zed2/imu/data', Imu)
+    return scan_data
+
 def left_camera():
     scan_data = rospy.wait_for_message('/left_camera/image_raw', Image)
     return scan_data
 
+
 def estimate_distance(cv_image, focal):
+    global keypoints
     # Convert the image to grayscale
     gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
     # Apply a threshold to convert the grayscale image to binary
     COLOR_MIN = (39, 106, 124)
     COLOR_MAX = (77, 237, 189)
     thresh_img = cv2.inRange(gray_image, COLOR_MIN, COLOR_MAX)
-    # Find contours of the binary image
-    contours, _ = cv2.findContours(thresh_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    params = cv2.SimpleBlobDetector_Params()
+    # Set parameters for blob detection (change as needed)
+    params.minThreshold = 10
+    params.maxThreshold = 200
+    params.filterByArea = True
+    params.minArea = 100
+    params.filterByCircularity = False
+    params.filterByConvexity = False
+    params.filterByInertia = False
 
-    min_distance = float('inf')
+    # Create blob detector
+    detector = cv2.SimpleBlobDetector_create(params)
     
-    for contour in contours:
-        # Calculate the bounding rectangle of the contour
-        x, y, w, h = cv2.boundingRect(contour)
-        
-        # Calculate the distance to the contour using the bounding rectangle
-        focal_length = focal.K[0] if focal.K[0] != 0 else 100  # Focal length in pixels (default to 100 if unknown)
-        distance = (w * focal_length) / w  # Convert to meters (adjust scaling factor based on units)
-        
-        # Update the minimum distance if the current distance is smaller
-        if distance < min_distance:
-            min_distance = distance
+    # Detect blobs
+    keypoints = detector.detect(thresh_img)
     
-    print("Minimum distance:", min_distance)
+    image_with_blobs = cv2.drawKeypoints(cv_image, keypoints, np.array([]), (0, 0, 255),
+                                             cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     
+    # Display the image with blobs (for visualization purposes)
+    cv2.imshow("Obstacle Detection", image_with_blobs)
+    cv2.waitKey(1)
+    obstacle_detected = len(keypoints) > 0
+    keypoints = keypoints
+    
+    obstacle_distances = []
+    for keypoint in keypoints:
+        blob_x, blob_y = keypoint.pt
+        distance_to_blob = math.sqrt(blob_x**2 + blob_y**2)
+        obstacle_distances.append(distance_to_blob)
+    print(obstacle_distances)
+    print("obstacel")
+    min_distance = min(obstacle_distances)
     # Check if the minimum distance is below the obstacle distance threshold
     if min_distance < 0.1:
         # Perform obstacle avoidance actions
@@ -191,23 +215,30 @@ def gps():
 
 def think(scan_data, robot_position=None):
     global desired_angular_vel
+    # forward_range = scan_data.ranges[180:270]
+    # left_range = scan_data.ranges[90:180]
+    # right_range = scan_data.ranges[270:360]
+    # forward_distance = sum(forward_range) / len(forward_range)
+    # left_distance = sum(left_range) / len(left_range)
+    # right_distance = sum(right_range) / len(right_range)
+    approach_threshold = 0.161
+    ranges = scan_data.ranges
+    front_distance = min(ranges[int(len(ranges)/2-10):int(len(ranges)/2+10)])
     
-    approach_threshold = 0.168
-    min_range = min(scan_data.ranges)
-    
-    print("min rane"+ str(min_range))
-    if min_range > approach_threshold:
+    print("min rane"+ str(front_distance))
+    if front_distance > approach_threshold:
         # Distance to obstacle is infinity, move towards the goal
         desired_angular_vel = 0.0
         move_flag = True
     else:
-        orientation = robot_position.pose.pose.orientation
-        (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        print("faing"+ str(yaw))
+        scanner = sensor_lidar()
+        ranges = scanner.ranges
+        left_distance = min(ranges[270:360])  # Measure distance in the left region
+        right_distance = min(ranges[0:90])  # M
         
-        if yaw <= 0:
+        if left_distance > right_distance:
             desired_angular_vel = -0.03
-        elif yaw > 0:
+        else:
             desired_angular_vel = 0.03
         
         move_flag = False
