@@ -129,12 +129,13 @@ def estimate_distance(cv_image, focal):
     # Detect blobs
     keypoints = detector.detect(thresh_img)
     
-    image_with_blobs = cv2.drawKeypoints(cv_image, keypoints, np.array([]), (0, 0, 255),
+    image_with_blobs = cv2.drawKeypoints(thresh_img, keypoints, np.array([]), (0, 0, 255),
                                              cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     
     # Display the image with blobs (for visualization purposes)
     cv2.imshow("Obstacle Detection", image_with_blobs)
     cv2.waitKey(1)
+    print(keypoints)
     obstacle_detected = len(keypoints) > 0
     keypoints = keypoints
     
@@ -145,13 +146,14 @@ def estimate_distance(cv_image, focal):
         obstacle_distances.append(distance_to_blob)
     print(obstacle_distances)
     print("obstacel")
-    min_distance = min(obstacle_distances)
-    # Check if the minimum distance is below the obstacle distance threshold
-    if min_distance < 0.1:
-        # Perform obstacle avoidance actions
-        # Example: Stop the robot, change direction, etc.
-        print("Obstacle detected. Taking avoidance action.")
-        return True
+    if obstacle_detected:
+        min_distance = min(obstacle_distances)
+        # Check if the minimum distance is below the obstacle distance threshold
+        if min_distance < 0.1:
+            # Perform obstacle avoidance actions
+            # Example: Stop the robot, change direction, etc.
+            print("Obstacle detected. Taking avoidance action.")
+            return True
     
     return False
 
