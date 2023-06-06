@@ -40,21 +40,21 @@ peg_08_lat, peg_08_lon = peg_08['latitude'], peg_08['longitude']
 
 
 def mean_gps(x1,y1, x2, y2):
-        # Convert degrees to radians
-        lat1 = math.radians(x1)
-        lon1 = math.radians(y1)
-        lat2 = math.radians(x2)
-        lon2 = math.radians(y2)
+    # Convert degrees to radians
+    lat1 = math.radians(x1)
+    lon1 = math.radians(y1)
+    lat2 = math.radians(x2)
+    lon2 = math.radians(y2)
 
-        # Find the average of the latitudes and the longitudes
-        avg_lat = (lat1 + lat2) / 2
-        avg_lon = (lon1 + lon2) / 2
+    # Find the average of the latitudes and the longitudes
+    avg_lat = (lat1 + lat2) / 2
+    avg_lon = (lon1 + lon2) / 2
 
-        # Convert back from radians to degrees
-        midpoint_latitude = math.degrees(avg_lat)
-        midpoint_longitude = math.degrees(avg_lon)
+    # Convert back from radians to degrees
+    midpoint_latitude = math.degrees(avg_lat)
+    midpoint_longitude = math.degrees(avg_lon)
 
-        return [midpoint_latitude, midpoint_longitude]
+    return [midpoint_latitude, midpoint_longitude]
     
 def mean_average(pointA, pointB):
     x1, y1 = pointA
@@ -160,14 +160,14 @@ def estimate_distance(cv_image, robot_position, image_width):
         obstacle_distances.append(distance_to_blob)
     print(obstacle_distances)
     # print("obstacel")
-    # if obstacle_detected:
-    #     min_distance = min(obstacle_distances)
-    #     # Check if the minimum distance is below the obstacle distance threshold
-    #     if min_distance < 638:
-    #         # Perform obstacle avoidance actions
-    #         # Example: Stop the robot, change direction, etc.
-    #         print("Obstacle detected. Taking avoidance action.")
-    #         return True
+    if obstacle_detected:
+        min_distance = min(obstacle_distances)
+        # Check if the minimum distance is below the obstacle distance threshold
+        if min_distance < 200:
+            # Perform obstacle avoidance actions
+            # Example: Stop the robot, change direction, etc.
+            print("Obstacle detected. Taking avoidance action.")
+            return True
     
     # return False
 
@@ -189,7 +189,7 @@ def analyse_image(scan_data, robot_position):
         return False
 
 def camera():
-    scan_data = rospy.wait_for_message('/camera/image_raw', Image)
+    scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
     return scan_data
 
 def act(robot_vel_publisher,  robot_position):
