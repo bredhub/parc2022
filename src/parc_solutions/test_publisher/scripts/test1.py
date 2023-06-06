@@ -16,7 +16,7 @@ from nav_msgs.msg import Odometry
 from parc_robot.gps2cartesian import gps_to_cartesian
 from sensor_msgs.msg import (CameraInfo, Image, Imu, LaserScan, NavSatFix,
                              PointCloud2)
-from tf.transformations import euler_from_quaternion
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 # Register the coordinates of the pegs
 peg_01 = rospy.get_param('peg_01')
@@ -226,7 +226,7 @@ def analyse_image(scan_data, robot_position, odom_position):
         
         # Convert the orientation to Euler angles
         (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        quaternion = euler_from_quaternion.quaternion_from_euler(roll, pitch, yaw)
+        quaternion = quaternion_from_euler(roll, pitch, yaw)
         image_width = scan_data.width
         image_height = scan_data.height
         bridge = CvBridge()
