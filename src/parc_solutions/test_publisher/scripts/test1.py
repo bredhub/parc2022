@@ -228,6 +228,7 @@ def analyse_image(scan_data, robot_position, odom_position):
     # Convert the orientation to Euler angles
     (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
     quaternion = quaternion_from_euler(roll, pitch, yaw)
+    print(quaternion)
     image_width = scan_data.width
     image_height = scan_data.height
     bridge = CvBridge()
