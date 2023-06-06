@@ -135,25 +135,26 @@ def calculate_rotation_matrix(camera_orientation_quaternion):
     
     return rotation_matrix
 
-def convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_length, camera_position, camera_orientation_quaternion):
+def convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_length, robot_position, robot_orientation_quaternion):
     # Convert blob coordinates to normalized image coordinates
     normalized_x = (blob_x - (image_width / 2)) / (image_width / 2)
     normalized_y = (blob_y - (image_height / 2)) / (image_height / 2)
-    
+
     # Convert to camera frame coordinates
     camera_frame_x = normalized_x * focal_length
     camera_frame_y = normalized_y * focal_length
     camera_frame_z = focal_length
-    
-    # Rotate camera frame coordinates to align with the world frame
-    rotation_matrix = calculate_rotation_matrix(camera_orientation_quaternion)
-    camera_frame_coordinates = np.array([camera_frame_x, camera_frame_y, camera_frame_z])
-    world_frame_coordinates = rotation_matrix @ camera_frame_coordinates
-    
-    # Translate to camera position in the world frame
-    world_frame_coordinates += np.array(camera_position)
-    
-    return world_frame_coordinates
+
+    # Convert quaternion to rotation matrix
+    quaternion = (robot_orientation_quaternion.x, robot_orientation_quaternion.y, robot_orientation_quaternion.z, robot_orientation_quaternion.w)
+    _, _, yaw = euler_from_quaternion(quaternion)
+
+    # Calculate world frame coordinates
+    world_frame_x = robot_position.x + camera_frame_x * np.cos(yaw) - camera_frame_y * np.sin(yaw)
+    world_frame_y = robot_position.y + camera_frame_x * np.sin(yaw) + camera_frame_y * np.cos(yaw)
+    world_frame_z = robot_position.z + camera_frame_z
+
+    return [world_frame_x, world_frame_y, world_frame_z]
 
 
 
@@ -202,7 +203,7 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
         world_frame_coordinates = convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_length,
                                                          robot_position, camera_orientation_quaternion)
         
-        distance_to_robot = math.sqrt((world_frame_coordinates[0] - robot_x) ** 2 + (world_frame_coordinates[1] - robot_y) ** 2)
+        distance_to_robot = math.sqrt((world_frame_coordinates[0] - robot_position.x) ** 2 + (world_frame_coordinates[1] - robot_position.y) ** 2)
         obstacle_distances.append(distance_to_robot)
     print(obstacle_distances)
     # print("obstacel")
