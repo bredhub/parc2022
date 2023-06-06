@@ -101,8 +101,19 @@ def gps():
     x, y = gps_to_cartesian(current_lat, current_lon)
     return [x, y]
 
-def estimate_distance(cv_image, robot_position):
+def convert_to_cartesian(pixel_coordinate, image_size, focal_length):
+    # Convert pixel coordinate to normalized coordinate (-1 to 1)
+    normalized_coordinate = (pixel_coordinate - (image_size / 2)) / (image_size / 2)
+    
+    # Convert normalized coordinate to Cartesian coordinate
+    cartesian_coordinate = normalized_coordinate * focal_length
+    
+    return cartesian_coordinate
+
+
+def estimate_distance(cv_image, robot_position, image_width):
     global keypoints
+    focal_length = 288
     # Convert the image to grayscale
     gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
     # Apply a threshold to convert the grayscale image to binary
@@ -141,7 +152,11 @@ def estimate_distance(cv_image, robot_position):
     obstacle_distances = []
     for keypoint in keypoints:
         blob_x, blob_y = keypoint.pt
-        distance_to_blob = math.sqrt((blob_x - robot_x)**2 + (blob_y - robot_y)**2)
+        cartesian_x = convert_to_cartesian(blob_x, image_width, focal_length)
+        cartesian_y = convert_to_cartesian(blob_y, image_width, focal_length)
+
+        # Calculate distance to blob using Cartesian coordinates
+        distance_to_blob = math.sqrt((cartesian_x - robot_x) ** 2 + (cartesian_y - robot_y) ** 2)
         obstacle_distances.append(distance_to_blob)
     print(obstacle_distances)
     # print("obstacel")
@@ -161,17 +176,13 @@ def analyse_image(scan_data, robot_position):
     #     rospy.logwarn('Camera info not available yet.')
     #     return False
     try:
-        print(scan_data.header)
-        print('OpenCV image data type:', str(scan_data.width))
         image_width = scan_data.width
-        # Image data shape
-        print(f'Image data shape: {scan_data.shape}')
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
         turn = False
         
         # Perform image processing and distance estimation
-        obstacle_detected = estimate_distance(cv_image, robot_position)
+        obstacle_detected = estimate_distance(cv_image, robot_position, image_width)
         return obstacle_detected
     except Exception as e:
         rospy.logerr(f"Error processing image: {str(e)}")
