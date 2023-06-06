@@ -131,7 +131,7 @@ def calculate_rotation_matrix(camera_orientation_quaternion):
     roll, pitch, yaw = camera_orientation_euler
     
     # Calculate rotation matrix from Euler angles
-    rotation_matrix = euler_to_rotation_matrix(roll, pitch, yaw)
+    rotation_matrix = euler_to_rotation_matrix(0, 0, yaw)
     
     return rotation_matrix
 
