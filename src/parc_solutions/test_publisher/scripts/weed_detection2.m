@@ -8,10 +8,10 @@ robotStatusSub = rossubscriber('/parc_robot/robot_status', 'std_msgs/String');
 weedDetectionPub = rospublisher('/parc_robot/weed_detection', 'std_msgs/String');
 
 % Create subscribers for lidar scan and camera topics
-lidarScanSub = rossubscriber('/parc_robot/lidar_scan');
-rightCameraSub = rossubscriber('/parc_robot/right_camera');
-leftCameraSub = rossubscriber('/parc_robot/left_camera');
-zedCameraSub = rossubscriber('/parc_robot/zed_camera');
+lidarScanSub = rossubscriber('/scan','sensor_msgs/LaserScan');
+rightCameraSub = rossubscriber('/right_camera/image_raw','sensor_msgs/Image');
+leftCameraSub = rossubscriber('/left_camera/image_raw','sensor_msgs/Image');
+zedCameraSub = rossubscriber('/camera/image_raw','sensor_msgs/Image');
 
 % Create a subscriber for GPS fix topic
 gpsFixSub = rossubscriber('/gps/fix', @gpsFixCallback);
@@ -30,22 +30,23 @@ while true
     % Receive robot status message
     robotStatusMsg = receive(robotStatusSub);
     robotStatus = robotStatusMsg.Data;
-    
+    disp(robotStatus);
+
     if strcmp(robotStatus, 'started')
         % Capture lidar scan
-        lidarScanMsg = receive(lidarScanSub);
+        lidarScanMsg = receive(lidarScanSub, 2);
         lidarScan = processLidarScan(lidarScanMsg);
         
         % Capture right camera image
-        rightCameraMsg = receive(rightCameraSub);
+        rightCameraMsg = receive(rightCameraSub, 2);
         rightCameraImage = processCameraImage(rightCameraMsg);
         
         % Capture left camera image
-        leftCameraMsg = receive(leftCameraSub);
-        leftCameraImage = processCameraImage(leftCameraMsg);
+        leftCameraMsg = receive(leftCameraSub, 2);
+        leftCameraImage = processCameraImage(leftCameraMs);
         
         % Capture ZED 2i camera image
-        zedCameraMsg = receive(zedCameraSub);
+        zedCameraMsg = receive(zedCameraSub, 2);
         zedCameraImage = processCameraImage(zedCameraMsg);
         
         % Process images into HSV and create threshold
