@@ -191,13 +191,8 @@ def gps():
 
 def think(scan_data, robot_position=None):
     global desired_angular_vel
-    # forward_range = scan_data.ranges[180:270]
-    # left_range = scan_data.ranges[90:180]
-    # right_range = scan_data.ranges[270:360]
-    # forward_distance = sum(forward_range) / len(forward_range)
-    # left_distance = sum(left_range) / len(left_range)
-    # right_distance = sum(right_range) / len(right_range)
-    approach_threshold = 0.161
+    
+    approach_threshold = 0.168
     min_range = min(scan_data.ranges)
     
     print("min rane"+ str(min_range))
@@ -211,9 +206,9 @@ def think(scan_data, robot_position=None):
         print("faing"+ str(yaw))
         
         if yaw <= 0:
-            desired_angular_vel = 0.03
-        elif yaw > 0:
             desired_angular_vel = -0.03
+        elif yaw > 0:
+            desired_angular_vel = 0.03
         
         move_flag = False
     return move_flag  
