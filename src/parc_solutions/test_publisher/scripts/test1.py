@@ -203,7 +203,7 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
         world_frame_coordinates = convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_length,
                                                          robot_position, camera_orientation_quaternion)
         
-        distance_to_robot = math.sqrt((world_frame_coordinates[0] - robot_position.x) ** 2 + (world_frame_coordinates[1] - robot_position.y) ** 2)
+        distance_to_robot = math.sqrt((world_frame_coordinates[0] - robot_position[0]) ** 2 + (world_frame_coordinates[1] - robot_position[1]) ** 2)
         obstacle_distances.append(distance_to_robot)
     print(obstacle_distances)
     # print("obstacel")
