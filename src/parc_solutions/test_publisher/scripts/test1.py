@@ -176,6 +176,20 @@ def camera():
     scan_data = rospy.wait_for_message('/camera/image_raw', Image)
     return scan_data
 
+def act(robot_vel_publisher,  robot_position):
+    global desired_angular_vel
+    robot_vel = Twist()
+    fwd_vel = 0.2
+    
+    if True:
+        #continue moving
+        robot_vel.linear.x = fwd_vel
+        robot_vel.angular.z = 0.0
+        msg = "Robot turned! because of obstacle \n"
+        robot_vel_publisher.publish(robot_vel)
+     
+    return msg
+    
 
 def main():
     rospy.init_node('collision_avoidance_node')
@@ -198,3 +212,15 @@ def main():
         
         #front camera
         front_call = analyse_image(camera_scan, robot_position)
+        
+        
+        message = act(robot_vel_publisher,  robot_position)
+    
+        
+        print(f'At time []: {message}!')
+
+        rate.sleep()
+
+
+if __name__ == '__main__':
+    main()
