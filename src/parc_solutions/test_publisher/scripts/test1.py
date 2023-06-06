@@ -461,7 +461,7 @@ def main():
         #front camera
         front_call = analyse_image(camera_scan, right_info, robot_position)
         #sense item by right
-        right_call = analyse_image(right_camera_scan, right_info, )
+        right_call = analyse_image(right_camera_scan, right_info, robot_position )
         right_call = analyse_image(right_camera_scan, right_info, robot_position)
         
         # #sense item by left
