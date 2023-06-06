@@ -13,8 +13,6 @@ rightCameraSub = rossubscriber('/right_camera/image_raw','sensor_msgs/Image');
 leftCameraSub = rossubscriber('/left_camera/image_raw','sensor_msgs/Image');
 zedCameraSub = rossubscriber('/camera/image_raw','sensor_msgs/Image');
 
-% Create a subscriber for GPS fix topic
-gpsFixSub = rossubscriber('/gps/fix', @gpsFixCallback);
 
 % Initialize variables
 robotPosition = [0; 0]; % Initialize with default position
@@ -33,6 +31,9 @@ while true
     disp(robotStatus);
 
     if strcmp(robotStatus, 'started')
+        % Create a subscriber for GPS fix topic
+        gpsFixSub = rossubscriber('/gps/fix', @gpsFixCallback);
+
         % Capture lidar scan
         lidarScanMsg = receive(lidarScanSub, 2);
         lidarScan = processLidarScan(lidarScanMsg);
@@ -120,7 +121,7 @@ function blobCoordinates = findBlobCoordinates(thresholdImage)
     % Get the centroid of each connected component
     s = regionprops(cc, 'Centroid');
     centroids = cat(1, s.Centroid);
-    
+    disp(centroids);
     % Convert centroid coordinates to [x, y] format
     blobCoordinates = fliplr(centroids);
 end
