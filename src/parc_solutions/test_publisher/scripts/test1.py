@@ -129,12 +129,13 @@ def estimate_distance(cv_image, focal):
     # Detect blobs
     keypoints = detector.detect(thresh_img)
     
-    image_with_blobs = cv2.drawKeypoints(cv_image, keypoints, np.array([]), (0, 0, 255),
+    image_with_blobs = cv2.drawKeypoints(thresh_img, keypoints, np.array([]), (0, 0, 255),
                                              cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     
     # Display the image with blobs (for visualization purposes)
     cv2.imshow("Obstacle Detection", image_with_blobs)
     cv2.waitKey(1)
+    print(keypoints)
     obstacle_detected = len(keypoints) > 0
     keypoints = keypoints
     
