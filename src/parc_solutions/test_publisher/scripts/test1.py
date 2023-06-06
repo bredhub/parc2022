@@ -303,10 +303,46 @@ def act(robot_vel_publisher, move_flag, robot_position, right_call, left_call):
     fwd_vel = 0.2
     
     if right_call:
-        print("move left")
+        #stop
+        robot_vel.linear.x = 0.0
+        robot_vel.angular.z = 0.0
+        msg = "Robot stopped turn left"
+        robot_vel_publisher.publish(robot_vel)
+        rospy.sleep(1)
+        
+        #chnae direction
+        robot_vel.linear.x = 0.0
+        robot_vel.angular.z = 0.07
+        robot_vel_publisher.publish(robot_vel)
+        rospy.sleep(1)
+        
+        #keep moving
+        robot_vel.linear.x = 0.2
+        robot_vel.angular.z = 0.0
+        robot_vel_publisher.publish(robot_vel)
+        
+        
     elif left_call:
-        print("move right")
-    if move_flag:
+        #stop
+        robot_vel.linear.x = 0.0
+        robot_vel.angular.z = 0.0
+        msg = "Robot stopped because turn right"
+        robot_vel_publisher.publish(robot_vel)
+        rospy.sleep(1)
+        
+        #chnae direction
+        robot_vel.linear.x = 0.0
+        robot_vel.angular.z = -0.07
+        
+        robot_vel_publisher.publish(robot_vel)
+        rospy.sleep(1)
+        
+        #keep moving
+        robot_vel.linear.x = 0.2
+        robot_vel.angular.z = 0.0
+        robot_vel_publisher.publish(robot_vel)
+        
+    elif move_flag:
         if current_goal_is_met(robot_position):
             if main_goal_met:
                 robot_vel.linear.x = 0.0
