@@ -132,18 +132,18 @@ def estimate_distance(cv_image, robot_position):
     # Display the image with blobs (for visualization purposes)
     cv2.imshow("Obstacle Detection", image_with_blobs)
     cv2.waitKey(1)
-    print(keypoints)
+    # print(keypoints)
     obstacle_detected = len(keypoints) > 0
     # keypoints = keypoints
-    # robot_x = robot_position[0]
+    robot_x = robot_position[0]
     
-    # robot_y = robot_position[1]
-    # obstacle_distances = []
-    # for keypoint in keypoints:
-    #     blob_x, blob_y = keypoint.pt
-    #     distance_to_blob = math.sqrt((blob_x - robot_x)**2 + (blob_y - robot_y)**2)
-    #     obstacle_distances.append(distance_to_blob)
-    # print(obstacle_distances)
+    robot_y = robot_position[1]
+    obstacle_distances = []
+    for keypoint in keypoints:
+        blob_x, blob_y = keypoint.pt
+        distance_to_blob = math.sqrt((blob_x - robot_x)**2 + (blob_y - robot_y)**2)
+        obstacle_distances.append(distance_to_blob)
+    print(obstacle_distances)
     # print("obstacel")
     # if obstacle_detected:
     #     min_distance = min(obstacle_distances)
@@ -185,7 +185,7 @@ def act(robot_vel_publisher,  robot_position):
         #continue moving
         robot_vel.linear.x = fwd_vel
         robot_vel.angular.z = 0.0
-        msg = "Robot turned! because of obstacle \n"
+        msg = "Robot continue moving \n"
         robot_vel_publisher.publish(robot_vel)
      
     return msg
