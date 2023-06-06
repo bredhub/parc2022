@@ -222,11 +222,11 @@ def analyse_image(scan_data, robot_position, odom_position):
     #     rospy.logwarn('Camera info not available yet.')
     #     return False
     try:
-        orientation = data.pose.pose.orientation
+        orientation = odom_position.pose.pose.orientation
         
         # Convert the orientation to Euler angles
         (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        quaternion = tf.quaternion_from_euler(roll, pitch, yaw)
+        quaternion = euler_from_quaternion.quaternion_from_euler(roll, pitch, yaw)
         image_width = scan_data.width
         image_height = scan_data.height
         bridge = CvBridge()
