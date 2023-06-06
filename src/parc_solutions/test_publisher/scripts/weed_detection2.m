@@ -14,7 +14,6 @@ rightCameraSub = rossubscriber('/right_camera/image_raw','sensor_msgs/Image');
 leftCameraSub = rossubscriber('/left_camera/image_raw','sensor_msgs/Image');
 zedCameraSub = rossubscriber('/camera/image_raw','sensor_msgs/Image');
 
-
 % Initialize variables
 robotPosition = [0; 0]; % Initialize with default position
 robotOrientation = 0; % Initialize with default orientation
@@ -26,6 +25,8 @@ COLOR_MAX = [37/360, 255/255, 217/255];
 
 % ROS loop
 while true
+    % Create a subscriber to /parc_robot/robot_status topic
+robotStatusSub = rossubscriber('/parc_robot/robot_status', 'std_msgs/String');
     % Receive robot status message
     robotStatusMsg = receive(robotStatusSub);
     robotStatus = robotStatusMsg.Data;
@@ -70,18 +71,23 @@ while true
         leftCameraBlobGlobal = transformCoordinates(leftCameraBlob, robotPosition, robotOrientation);
         zedCameraBlobGlobal = transformCoordinates(zedCameraBlob, robotPosition, robotOrientation);
         
+        % Append detected weed coordinates to the weed_found array
         weed_found = [weed_found; rightCameraBlobGlobal; leftCameraBlobGlobal; zedCameraBlobGlobal];
         
     elseif strcmp(robotStatus, 'finished')
-        % Convert weed_found to JSON string
-        jsonStr = jsonencode(weed_found);
-        disp(jsonStr);
-        % Create a message with the JSON string
-        weedDetectionMsg = rosmessage('std_msgs/String');
-        weedDetectionMsg.Data = jsonStr;
-        
-        % Publish weed_detection message
-        send(weedDetectionPub, weedDetectionMsg);
+        if ~isempty(weed_found)
+            % Convert weed_found to JSON string
+            jsonStr = jsonencode(weed_found);
+            disp(jsonStr);
+            % Create a message with the JSON string
+            weedDetectionMsg = rosmessage('std_msgs/String');
+            weedDetectionMsg.Data = jsonStr;
+            
+            % Publish weed_detection message
+            send(weedDetectionPub, weedDetectionMsg);
+        else
+            disp('No weed detected.');
+        end
         
         % Exit the loop
         break;
@@ -124,7 +130,7 @@ function blobCoordinates = findBlobCoordinates(thresholdImage)
     % Get the centroid of each connected component
     s = regionprops(cc, 'Centroid');
     centroids = cat(1, s.Centroid);
-    disp(centroids);
+    
     % Convert centroid coordinates to [x, y] format
     blobCoordinates = fliplr(centroids);
 end
