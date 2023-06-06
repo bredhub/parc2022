@@ -73,7 +73,7 @@ while true
     elseif strcmp(robotStatus, 'finished')
         % Convert weed_found to JSON string
         jsonStr = jsonencode(weed_found);
-        
+        disp(jsonStr);
         % Create a message with the JSON string
         weedDetectionMsg = rosmessage('std_msgs/String');
         weedDetectionMsg.Data = jsonStr;
