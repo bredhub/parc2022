@@ -575,6 +575,18 @@ solution_task_two_SOURCE_DIR:STATIC=/home/bredhub/catkin_ws/src/parc_solutions/s
 std_msgs_DIR:PATH=/opt/ros/noetic/share/std_msgs/cmake
 
 //Value Computed by CMake
+task1_BINARY_DIR:STATIC=/home/bredhub/catkin_ws/build/my_solution/task1
+
+//Value Computed by CMake
+task1_SOURCE_DIR:STATIC=/home/bredhub/catkin_ws/src/my_solution/task1
+
+//Value Computed by CMake
+task2_BINARY_DIR:STATIC=/home/bredhub/catkin_ws/build/my_solution/task2
+
+//Value Computed by CMake
+task2_SOURCE_DIR:STATIC=/home/bredhub/catkin_ws/src/my_solution/task2
+
+//Value Computed by CMake
 test_publisher_BINARY_DIR:STATIC=/home/bredhub/catkin_ws/build/parc_solutions/test_publisher
 
 //Value Computed by CMake
@@ -754,7 +766,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=13
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=15
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

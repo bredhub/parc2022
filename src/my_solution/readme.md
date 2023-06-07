@@ -44,7 +44,7 @@ It can help overcome challenges such as labor shortages, increase productivity a
     - I used the right camera, left camera, and camera sensors to take pictures of the moving robot in order to avoid obstacles. Additionally, I converted the image to hsv before threshing it. Calculate the distance to the robot after converting the detected blob to cartesian coordinates. It drifts away from the obstacle if the distance is less than 2.5.
 
 Write the command required to run your solution. Should be in this format: <br>
-` roslaunch my_solution task1_solution.launch `
+` roslaunch task1 task1_solution.launch `
 
 
 

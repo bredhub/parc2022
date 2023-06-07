@@ -61,7 +61,9 @@ all: PARC-Engineers-League/scout_ros/scout_bringup/all
 all: PARC-Engineers-League/scout_ros/scout_description/all
 all: parc_solutions/solution_task_one/all
 all: parc_solutions/solution_task_two/all
+all: my_solution/task2/all
 all: PARC-Engineers-League/scout_ros/scout_base/all
+all: my_solution/task1/all
 all: parc_solutions/test_publisher/all
 
 .PHONY : all
@@ -75,7 +77,9 @@ preinstall: PARC-Engineers-League/scout_ros/scout_bringup/preinstall
 preinstall: PARC-Engineers-League/scout_ros/scout_description/preinstall
 preinstall: parc_solutions/solution_task_one/preinstall
 preinstall: parc_solutions/solution_task_two/preinstall
+preinstall: my_solution/task2/preinstall
 preinstall: PARC-Engineers-League/scout_ros/scout_base/preinstall
+preinstall: my_solution/task1/preinstall
 preinstall: parc_solutions/test_publisher/preinstall
 
 .PHONY : preinstall
@@ -94,7 +98,9 @@ clean: PARC-Engineers-League/scout_ros/scout_bringup/clean
 clean: PARC-Engineers-League/scout_ros/scout_description/clean
 clean: parc_solutions/solution_task_one/clean
 clean: parc_solutions/solution_task_two/clean
+clean: my_solution/task2/clean
 clean: PARC-Engineers-League/scout_ros/scout_base/clean
+clean: my_solution/task1/clean
 clean: parc_solutions/test_publisher/clean
 
 .PHONY : clean
@@ -335,6 +341,42 @@ gtest/googletest/clean: gtest/googletest/CMakeFiles/gtest_main.dir/clean
 gtest/googletest/clean: gtest/googletest/CMakeFiles/gtest.dir/clean
 
 .PHONY : gtest/googletest/clean
+
+#=============================================================================
+# Directory level rules for directory my_solution/task1
+
+# Recursive "all" directory target.
+my_solution/task1/all:
+
+.PHONY : my_solution/task1/all
+
+# Recursive "preinstall" directory target.
+my_solution/task1/preinstall:
+
+.PHONY : my_solution/task1/preinstall
+
+# Recursive "clean" directory target.
+my_solution/task1/clean:
+
+.PHONY : my_solution/task1/clean
+
+#=============================================================================
+# Directory level rules for directory my_solution/task2
+
+# Recursive "all" directory target.
+my_solution/task2/all:
+
+.PHONY : my_solution/task2/all
+
+# Recursive "preinstall" directory target.
+my_solution/task2/preinstall:
+
+.PHONY : my_solution/task2/preinstall
+
+# Recursive "clean" directory target.
+my_solution/task2/clean:
+
+.PHONY : my_solution/task2/clean
 
 #=============================================================================
 # Directory level rules for directory parc_solutions/solution_task_one
