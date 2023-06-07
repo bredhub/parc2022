@@ -226,12 +226,12 @@ def stop_robot(robot_vel, robot_vel_publisher):
     
 def turn_left(robot_vel, robot_vel_publisher):
     robot_vel.linear.x = 0.0
-    robot_vel.angular.z = 0.07
+    robot_vel.angular.z = 0.09
     robot_vel_publisher.publish(robot_vel)
     
 def turn_right(robot_vel, robot_vel_publisher):
     robot_vel.linear.x = 0.0
-    robot_vel.angular.z = -0.07
+    robot_vel.angular.z = -0.09
     robot_vel_publisher.publish(robot_vel)
 
 
@@ -258,7 +258,7 @@ def drift_right(robot_vel, robot_vel_publisher):
      #stop 
     stop_robot(robot_vel, robot_vel_publisher)
     
-    rospy.sleep(0.05)
+    rospy.sleep(0.5)
     
     #turn left
     turn_right(robot_vel, robot_vel_publisher)
@@ -266,7 +266,7 @@ def drift_right(robot_vel, robot_vel_publisher):
     stop_robot(robot_vel, robot_vel_publisher)
     #continue moving
     
-    rospy.sleep(0.05)
+    rospy.sleep(0.5)
     robot_vel.linear.x = 0.1
     robot_vel.angular.z = 0.0
     robot_vel_publisher.publish(robot_vel) 
@@ -319,10 +319,10 @@ def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, le
             drift_left(robot_vel, robot_vel_publisher)
     elif right_obstacle[0]:
         msg = "robot stop to turn left obstacle"
-        drift_left(robot_vel, robot_vel_publisher)
+        drift_right(robot_vel, robot_vel_publisher)
     elif left_obstacle[0]:
         msg = "robot stop to turn right obstacle"
-        drift_right(robot_vel, robot_vel_publisher)
+        drift_left(robot_vel, robot_vel_publisher)
     else:
         #continue moving
         robot_vel.linear.x = fwd_vel
