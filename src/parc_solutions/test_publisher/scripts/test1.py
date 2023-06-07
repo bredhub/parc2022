@@ -173,7 +173,7 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
         min_distance = min(obstacle_distances)
        
         # Check if the minimum distance is below the obstacle distance threshold
-        print(min_distance)
+        # print(min_distance)
         if min_distance < 2.55:
             # Perform obstacle avoidance actions
             # Example: Stop the robot, change direction, etc.
