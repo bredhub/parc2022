@@ -124,8 +124,8 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
     # Convert the image to grayscale
     gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
     # Apply a threshold to convert the grayscale image to binary
-    COLOR_MIN = (39, 106, 124)
-    COLOR_MAX = (77, 237, 189)
+    COLOR_MIN = (12, 120, 124)
+    COLOR_MAX = (80, 255, 189)
     thresh_img = cv2.inRange(gray_image, COLOR_MIN, COLOR_MAX)
     thresh_img = cv2.erode(thresh_img, None)
     params = cv2.SimpleBlobDetector_Params()
