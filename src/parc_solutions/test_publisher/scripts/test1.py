@@ -217,12 +217,14 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
                                                          robot_position, camera_orientation_quaternion)
         da = get_blob_relative_point(thresh_img, keypoint)
         print(da)
-        distance_to_robot = math.sqrt((world_frame_coordinates[0] - robot_position[0]) ** 2 + (world_frame_coordinates[1] - robot_position[1]) ** 2)
+        print(robot_position)
+        distance_to_robot = math.sqrt((da[0] - robot_position[0]) ** 2 + (da[1] - robot_position[1]) ** 2)
         blob_radius = keypoint.size / 2
         distance_to_edge = distance_to_robot - blob_radius
-        obstacle_distances.append(distance_to_edge)
-    
+        obstacle_distances.append(distance_to_robot)
+
     # print("obstacel")
+    print(obstacle_distances)
     if obstacle_detected:
         min_distance = min(obstacle_distances)
        
