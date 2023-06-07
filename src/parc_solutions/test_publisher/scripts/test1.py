@@ -160,15 +160,15 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
     for keypoint in keypoints:
         blob_x, blob_y = keypoint.pt
         da = get_blob_relative_point(thresh_img, keypoint)
-        print(da)
-        print(robot_position)
+        # print(da)
+        # print(robot_position)
         distance_to_robot = math.sqrt((da[0] - robot_position[0]) ** 2 + (da[1] - robot_position[1]) ** 2)
         blob_radius = keypoint.size / 2
         distance_to_edge = distance_to_robot - blob_radius
         obstacle_distances.append(distance_to_robot)
 
     # print("obstacel")
-    print(obstacle_distances)
+    # print(obstacle_distances)
     if obstacle_detected:
         min_distance = min(obstacle_distances)
        
@@ -272,6 +272,9 @@ def act(robot_vel_publisher,  robot_position, right_obstacle, left_obstacle):
     robot_vel = Twist()
     fwd_vel = 0.2
     msg = ""
+    
+    print(right_obstacle)
+    print(left_obstacle)
     if right_obstacle[0] and left_obstacle[0]:
         if right_obstacle[1] < left_obstacle[1]:
             msg = "robot stop to turn left"
