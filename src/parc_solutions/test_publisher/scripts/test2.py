@@ -256,9 +256,12 @@ def calculate_desired_heading(current_lat, current_lon):
     delta_lat = goal_lat - current_lat
     delta_lon = goal_lon - current_lon
 
-    # Convert delta_lat and delta_lon to radians
-    delta_lat_rad = math.radians(delta_lat)
-    delta_lon_rad = math.radians(delta_lon)
+    print(goal_lat)
+    print(delta_lat)
+    print("-------")
+    # # Convert delta_lat and delta_lon to radians
+    # delta_lat_rad = math.radians(delta_lat)
+    # delta_lon_rad = math.radians(delta_lon)
 
     # Calculate the desired heading angle
     desired_heading = math.atan2(delta_lon_rad, delta_lat_rad)

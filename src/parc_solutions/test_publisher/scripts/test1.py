@@ -242,49 +242,89 @@ def turn_right(robot_vel, robot_vel_publisher):
     robot_vel.angular.z = -0.09
     robot_vel_publisher.publish(robot_vel)
 
+def calculate_desired_heading(current_lat, current_lon):
+    global current_location
+    # Calculate the angle between the current position and the goal position
+    goal_lat = current_location[0]
+    goal_lon = current_location[1]
+    delta_lat = goal_lat - current_lat
+    delta_lon = goal_lon - current_lon
 
-def drift_left(robot_vel, robot_vel_publisher):
+    print(goal_lat)
+    print(delta_lat)
+    print("-------")
+    # # Convert delta_lat and delta_lon to radians
+    # delta_lat_rad = math.radians(delta_lat)
+    # delta_lon_rad = math.radians(delta_lon)
+
+    # Calculate the desired heading angle
+    desired_heading = math.atan2(delta_lon, delta_lat)
+
+    return desired_heading
+
+def drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation):
+    robot_yaw = robot_orientation
+    goal_yaw = calculate_desired_heading(robot_position[0], robot_position[1])
     
      #stop 
     stop_robot(robot_vel, robot_vel_publisher)
     print("stop")
-    rospy.sleep(0.05)
+    rospy.sleep(0.5)
     
     #turn left
     turn_left(robot_vel, robot_vel_publisher)
     print("turn left")
     rospy.sleep(0.05)
-    stop_robot(robot_vel, robot_vel_publisher)
-    #continue moving
-    print("stop")
+    while True:
+        if(abs(goal_yaw - robot_yaw) > 0.1):
+            turn_left(robot_vel, robot_vel_publisher)
+            print("turn right")
+        else:
+            print("stop")
+            stop_robot(robot_vel, robot_vel_publisher)
+            #continue moving
+            
+            rospy.sleep(0.5)
+            break
     
-    rospy.sleep(0.05)
-    robot_vel.linear.x = 0.05
-    robot_vel.angular.z = 0.0
-    robot_vel_publisher.publish(robot_vel) 
-    print("moves")
+    # rospy.sleep(0.05)
+    # robot_vel.linear.x = 0.05
+    # robot_vel.angular.z = 0.0
+    # robot_vel_publisher.publish(robot_vel) 
+    # print("moves")
    
-def drift_right(robot_vel, robot_vel_publisher):
+def drift_right(robot_vel, robot_vel_publisher,robot_position, robot_orientation):
+    robot_yaw = robot_orientation
+    goal_yaw = calculate_desired_heading(robot_position[0], robot_position[1])
     
+     
      #stop 
     stop_robot(robot_vel, robot_vel_publisher)
     print("stop")
     rospy.sleep(0.5)
-    
-    #turn left
     print("turn right")
     turn_right(robot_vel, robot_vel_publisher)
     rospy.sleep(0.05)
+    while True:
+        if(abs(goal_yaw - robot_yaw) > 0.1):
+            turn_right(robot_vel, robot_vel_publisher)
+            print("turn right")
+        else:
+            print("stop")
+            stop_robot(robot_vel, robot_vel_publisher)
+            #continue moving
+            
+            rospy.sleep(0.5)
+            break
     
-    print("stop")
-    stop_robot(robot_vel, robot_vel_publisher)
-    #continue moving
     
-    rospy.sleep(0.5)
-    robot_vel.linear.x = 0.1
-    robot_vel.angular.z = 0.0
-    robot_vel_publisher.publish(robot_vel) 
-    print("keep moving")
+    
+    
+    
+    # robot_vel.linear.x = 0.1
+    # robot_vel.angular.z = 0.0
+    # robot_vel_publisher.publish(robot_vel) 
+    # print("keep moving")
     
 def check_robot_orientation(data):
     orientation = data.pose.pose.orientation
@@ -295,6 +335,7 @@ def check_robot_orientation(data):
     # Update the robot's current orientation (theta)
     return yaw  
 
+    
 def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, left_obstacle, front_obstacle):
     robot_vel = Twist()
     fwd_vel = 0.2
@@ -306,37 +347,37 @@ def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, le
     print(front_obstacle)
     if front_obstacle[0] and right_obstacle[0]:
         msg = "front camera discovered item on right"
-        drift_right(robot_vel, robot_vel_publisher)
+        drift_right(robot_vel, robot_vel_publisher, robot_position, robot_orientation)
     elif front_obstacle[0] and left_obstacle[0]:
         msg = "front camera discovered item on left"
-        drift_left(robot_vel, robot_vel_publisher)
+        drift_left(robot_vel, robot_vel_publisher, robot_position, robot_orientation)
     elif front_obstacle[0] and right_obstacle[0] and left_obstacle[0]:
         if right_obstacle[1] > left_obstacle[1]:
             msg = "all camera discovered byt right greater than left"
-            drift_right(robot_vel, robot_vel_publisher)
+            drift_right(robot_vel, robot_vel_publisher, robot_position, robot_orientation)
         elif right_obstacle[1] < left_obstacle[1]:
             msg = "all camera discovered byt left greater than right"
-            drift_left(robot_vel, robot_vel_publisher)
+            drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
     
     elif front_obstacle[0] and robot_orientation > -3.0:
         msg = "front camera discovered item on position greater than -3.0"
-        drift_right(robot_vel, robot_vel_publisher)
+        drift_right(robot_vel, robot_vel_publisher, robot_position, robot_orientation)
     elif front_obstacle[0] and robot_orientation < -3.0:
         msg = "front camera discovered item on position less than -3.0"
-        drift_left(robot_vel, robot_vel_publisher)
+        drift_left(robot_vel, robot_vel_publisher, robot_position, robot_orientation)
     elif right_obstacle[0] and left_obstacle[0]:
         if right_obstacle[1] > left_obstacle[1]:
             msg = "right and left camera discovered byt right greater than left"
-            drift_left(robot_vel, robot_vel_publisher)
+            drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
         elif right_obstacle[1] < left_obstacle[1]:
             msg = "right and left camera discovered byt left greater than right"
-            drift_right(robot_vel, robot_vel_publisher)
+            drift_right(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
     elif right_obstacle[0]:
         msg = "robot stop to turn left obstacle"
-        drift_right(robot_vel, robot_vel_publisher)
+        drift_right(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
     elif left_obstacle[0]:
         msg = "robot stop to turn right obstacle"
-        drift_left(robot_vel, robot_vel_publisher)
+        drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
     else:
         #continue moving
         robot_vel.linear.x = fwd_vel
