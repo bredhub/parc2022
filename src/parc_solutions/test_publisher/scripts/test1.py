@@ -221,11 +221,11 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
     COLOR_MIN = (39, 106, 124)
     COLOR_MAX = (77, 237, 189)
     thresh_img = cv2.inRange(gray_image, COLOR_MIN, COLOR_MAX)
-    
+    thresh_img = cv2.erode(thresh_img, None)
     params = cv2.SimpleBlobDetector_Params()
     # Set parameters for blob detection (change as needed)
-    params.minThreshold = 10
-    params.maxThreshold = 200
+    params.minThreshold = 30
+    params.maxThreshold = 20000
     params.filterByArea = True
     params.minArea = 100
     params.filterByCircularity = False
