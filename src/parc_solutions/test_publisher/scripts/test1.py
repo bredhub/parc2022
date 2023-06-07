@@ -265,12 +265,15 @@ def drift_right(robot_vel, robot_vel_publisher):
     
      #stop 
     stop_robot(robot_vel, robot_vel_publisher)
-    
+    print("stop")
     rospy.sleep(0.5)
     
     #turn left
+    print("turn right")
     turn_right(robot_vel, robot_vel_publisher)
     rospy.sleep(0.05)
+    
+    print("stop")
     stop_robot(robot_vel, robot_vel_publisher)
     #continue moving
     
@@ -278,7 +281,7 @@ def drift_right(robot_vel, robot_vel_publisher):
     robot_vel.linear.x = 0.1
     robot_vel.angular.z = 0.0
     robot_vel_publisher.publish(robot_vel) 
-    
+    print("keep moving")
     
 def check_robot_orientation(data):
     orientation = data.pose.pose.orientation
