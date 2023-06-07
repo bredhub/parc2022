@@ -203,7 +203,7 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
         blob_x, blob_y = keypoint.pt
         world_frame_coordinates = convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_length,
                                                          robot_position, camera_orientation_quaternion)
-        
+        print(world_frame_coordinates)
         distance_to_robot = math.sqrt((world_frame_coordinates[0] - robot_position[0]) ** 2 + (world_frame_coordinates[1] - robot_position[1]) ** 2)
         blob_radius = keypoint.size / 2
         distance_to_edge = distance_to_robot - blob_radius
