@@ -205,12 +205,16 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
                                                          robot_position, camera_orientation_quaternion)
         
         distance_to_robot = math.sqrt((world_frame_coordinates[0] - robot_position[0]) ** 2 + (world_frame_coordinates[1] - robot_position[1]) ** 2)
-        obstacle_distances.append(distance_to_robot)
-    print(obstacle_distances)
+        blob_radius = keypoint.size / 2
+        distance_to_edge = distance_to_robot - blob_radius
+        obstacle_distances.append(distance_to_edge)
+    
     # print("obstacel")
     if obstacle_detected:
         min_distance = min(obstacle_distances)
+        
         # Check if the minimum distance is below the obstacle distance threshold
+        print(min_distance)
         if min_distance < 200:
             # Perform obstacle avoidance actions
             # Example: Stop the robot, change direction, etc.
