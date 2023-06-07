@@ -214,6 +214,11 @@ def left_camera():
     scan_data = rospy.wait_for_message('/left_camera/image_raw', Image)
     return scan_data
 
+
+def front_camera():
+    scan_data = rospy.wait_for_message('/camera/image_raw', Image)
+    return scan_data
+
 def stop_robot(robot_vel, robot_vel_publisher):
     robot_vel.linear.x = 0.0
     robot_vel.angular.z = 0.0
@@ -276,7 +281,7 @@ def check_robot_orientation(data):
     # Update the robot's current orientation (theta)
     return yaw  
 
-def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, left_obstacle):
+def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, left_obstacle, front_obstacle):
     
     global desired_angular_vel
     robot_vel = Twist()
@@ -286,6 +291,7 @@ def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, le
     print(robot_orientation)
     print(right_obstacle)
     print(left_obstacle)
+    print(front_obstacle)
     if right_obstacle[0]:
         msg = "robot stop to turn left obstacle"
         drift_right(robot_vel, robot_vel_publisher)
@@ -315,6 +321,7 @@ def main():
         
         right_camera_scan = right_camera()
         left_camera_scan = left_camera()
+        front_camera_scan = front_camera()
         #get position 
         robot_position = gps()
         
@@ -327,7 +334,10 @@ def main():
         #left camera
         left_obstacle = analyse_image(left_camera_scan, robot_position, position_robot)
         
-        message = act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, left_obstacle)
+        #left camera
+        front_obstacle = analyse_image(front_camera_scan, robot_position, position_robot)
+        
+        message = act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, left_obstacle, front_obstacle)
     
         
         print(f'At time []: {message}!')
