@@ -244,7 +244,7 @@ def drift_left(robot_vel, robot_vel_publisher):
     #continue moving
     
     rospy.sleep(0.05)
-    robot_vel.linear.x = fwd_vel
+    robot_vel.linear.x = 0.1
     robot_vel.angular.z = 0.0
     robot_vel_publisher.publish(robot_vel) 
 
@@ -262,7 +262,7 @@ def drift_right(robot_vel, robot_vel_publisher):
     #continue moving
     
     rospy.sleep(0.05)
-    robot_vel.linear.x = fwd_vel
+    robot_vel.linear.x = 0.1
     robot_vel.angular.z = 0.0
     robot_vel_publisher.publish(robot_vel) 
      
