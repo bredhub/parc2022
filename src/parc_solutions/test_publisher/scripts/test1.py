@@ -265,30 +265,27 @@ def drift_right(robot_vel, robot_vel_publisher):
     robot_vel.linear.x = 0.1
     robot_vel.angular.z = 0.0
     robot_vel_publisher.publish(robot_vel) 
-     
-def act(robot_vel_publisher,  robot_position, right_obstacle, left_obstacle):
+    
+    
+def check_robot_orientation(data):
+    orientation = data.pose.pose.orientation
+        
+    # Convert the orientation to Euler angles
+    (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+    
+    # Update the robot's current orientation (theta)
+    return yaw  
+
+def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, left_obstacle):
     
     global desired_angular_vel
     robot_vel = Twist()
     fwd_vel = 0.2
     msg = ""
-    
+    robot_orientation = check_robot_orientation(position_robot)
+    print(robot_orientation)
     print(right_obstacle)
     print(left_obstacle)
-    # if right_obstacle[0] and left_obstacle[0]:
-    #     if right_obstacle[1] < left_obstacle[1]:
-    #         msg = "robot stop to turn left"
-    #         drift_left(robot_vel, robot_vel_publisher)
-    #     else:
-    #         msg = "robot stop to turn left right"
-    #         drift_right(robot_vel, robot_vel_publisher)
-        
-    # elif right_obstacle[0] and not left_obstacle[0]:
-    #     msg = "robot stop to turn left obstacle"
-    #     drift_left(robot_vel, robot_vel_publisher)
-    # elif right_obstacle[0] != True and left_obstacle[0]:
-    #     msg = "robot stop to turn right obstacle"
-    #     drift_right(robot_vel, robot_vel_publisher)
     if right_obstacle[0]:
         msg = "robot stop to turn left obstacle"
         drift_right(robot_vel, robot_vel_publisher)
@@ -330,7 +327,7 @@ def main():
         #left camera
         left_obstacle = analyse_image(left_camera_scan, robot_position, position_robot)
         
-        message = act(robot_vel_publisher,  robot_position, right_obstacle, left_obstacle)
+        message = act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, left_obstacle)
     
         
         print(f'At time []: {message}!')
