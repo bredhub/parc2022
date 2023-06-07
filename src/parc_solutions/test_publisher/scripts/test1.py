@@ -309,7 +309,7 @@ def main():
     while not rospy.is_shutdown():
         
         right_camera_scan = right_camera()
-        left_camera_scan = right_camera()
+        left_camera_scan = left_camera()
         #get position 
         robot_position = gps()
         
