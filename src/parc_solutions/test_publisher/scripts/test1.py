@@ -263,7 +263,7 @@ def drift_left(robot_vel, robot_vel_publisher):
     robot_vel.angular.z = 0.0
     robot_vel_publisher.publish(robot_vel) 
     print("moves")
-    drift_right(robot_vel, robot_vel_publisher)
+   
 def drift_right(robot_vel, robot_vel_publisher):
     
      #stop 
@@ -285,7 +285,7 @@ def drift_right(robot_vel, robot_vel_publisher):
     robot_vel.angular.z = 0.0
     robot_vel_publisher.publish(robot_vel) 
     print("keep moving")
-    drift_left(robot_vel, robot_vel_publisher)
+    
 def check_robot_orientation(data):
     orientation = data.pose.pose.orientation
         
