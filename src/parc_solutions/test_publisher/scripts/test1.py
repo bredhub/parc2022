@@ -284,8 +284,10 @@ def act(robot_vel_publisher,  robot_position, right_obstacle, left_obstacle):
             drift_right(robot_vel, robot_vel_publisher)
         
     elif right_obstacle[0] and not left_obstacle[0]:
+        msg = "robot stop to turn left obstacle"
         drift_left(robot_vel, robot_vel_publisher)
-    elif not right_obstacle[0] and left_obstacle[0]:
+    elif right_obstacle[0] != True and left_obstacle[0]:
+        msg = "robot stop to turn right obstacle"
         drift_right(robot_vel, robot_vel_publisher)
     else:
         #continue moving
