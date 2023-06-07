@@ -321,10 +321,10 @@ def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, le
     elif right_obstacle[0] and left_obstacle[0]:
         if right_obstacle[1] > left_obstacle[1]:
             msg = "right and left camera discovered byt right greater than left"
-            drift_right(robot_vel, robot_vel_publisher)
+            drift_left(robot_vel, robot_vel_publisher)
         elif right_obstacle[1] < left_obstacle[1]:
             msg = "right and left camera discovered byt left greater than right"
-            drift_left(robot_vel, robot_vel_publisher)
+            drift_right(robot_vel, robot_vel_publisher)
     elif right_obstacle[0]:
         msg = "robot stop to turn left obstacle"
         drift_right(robot_vel, robot_vel_publisher)
@@ -351,8 +351,8 @@ def main():
     
     while not rospy.is_shutdown():
         
-        right_camera_scan = zed_right_camera()
-        left_camera_scan = zed_left_camera()
+        right_camera_scan = right_camera()
+        left_camera_scan = left_camera()
         front_camera_scan = front_camera()
         #get position 
         robot_position = gps()
