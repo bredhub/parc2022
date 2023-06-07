@@ -256,12 +256,12 @@ def drift_right(robot_vel, robot_vel_publisher):
     rospy.sleep(0.05)
     
     #turn left
-    turn_left(robot_vel, robot_vel_publisher)
+    turn_right(robot_vel, robot_vel_publisher)
     rospy.sleep(0.05)
     stop_robot(robot_vel, robot_vel_publisher)
     #continue moving
     
-    rospy.sleep(30)
+    rospy.sleep(0.05)
     robot_vel.linear.x = 0.1
     robot_vel.angular.z = 0.0
     robot_vel_publisher.publish(robot_vel) 
