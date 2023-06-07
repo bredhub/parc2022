@@ -210,6 +210,10 @@ def right_camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
     return scan_data
 
+def left_camera():
+    scan_data = rospy.wait_for_message('/left_camera/image_raw', Image)
+    return scan_data
+
 def stop_robot(robot_vel, robot_vel_publisher):
     robot_vel.linear.x = 0.0
     robot_vel.angular.z = 0.0
@@ -225,7 +229,7 @@ def turn_right(robot_vel, robot_vel_publisher):
     robot_vel.angular.z = -0.07
     robot_vel_publisher.publish(robot_vel)
     
-def act(robot_vel_publisher,  robot_position, right_obstacle):
+def act(robot_vel_publisher,  robot_position, right_obstacle, left_obstacle):
     
     global desired_angular_vel
     robot_vel = Twist()
@@ -247,18 +251,9 @@ def act(robot_vel_publisher,  robot_position, right_obstacle):
         robot_vel.linear.x = fwd_vel
         robot_vel.angular.z = 0.0
         robot_vel_publisher.publish(robot_vel)
-        
-        
-        #turn right
-        turn_right(robot_vel, robot_vel_publisher)
-        rospy.sleep(0.2)
-        stop_robot(robot_vel, robot_vel_publisher)
-        #continue moving
-        
-        rospy.sleep(0.2)
-        robot_vel.linear.x = fwd_vel
-        robot_vel.angular.z = 0.0
-        robot_vel_publisher.publish(robot_vel)
+    
+    
+    elif 
         
     else:
         #continue moving
@@ -282,18 +277,20 @@ def main():
     while not rospy.is_shutdown():
         
         right_camera_scan = right_camera()
-        
+        left_camera_scan = right_camera()
         #get position 
         robot_position = gps()
         
         #where the robot is facing
         position_robot = odom()
         
-        #front camera
+        #right camera
         right_obstacle = analyse_image(right_camera_scan, robot_position, position_robot)
         
+        #left camera
+        left_obstacle = analyse_image(left_camera_scan, robot_position, position_robot)
         
-        message = act(robot_vel_publisher,  robot_position, right_obstacle)
+        message = act(robot_vel_publisher,  robot_position, right_obstacle, left_obstacle)
     
         
         print(f'At time []: {message}!')
