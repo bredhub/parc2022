@@ -275,10 +275,15 @@ def drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
     turn_left(robot_vel, robot_vel_publisher)
     print("turn left")
     rospy.sleep(0.05)
+    
+    print(robot_yaw)
+    print("robot yaw")
+    print("goal_yaw")
+    print(goal_yaw)  
     while True:
         if(abs(goal_yaw - robot_yaw) > 0.1):
             turn_left(robot_vel, robot_vel_publisher)
-            print("turn right")
+            
         else:
             print("stop")
             stop_robot(robot_vel, robot_vel_publisher)
