@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="my_solution" type="collision_detector" name="my_robot_node" output="screen">
+    <param name="python_script" value="robot_publisher.py" />
+  </node>
+</launch>
