@@ -198,10 +198,10 @@ def estimate_distances(cv_image, robot_position, image_width, image_height, came
                                           (world_frame_coordinates[1] - robot_y) ** 2)
             
             obstacle_distances.append(distance_to_robot)
-    print(obstacle_distances)
+    
     if obstacle_detected: 
         min_distance = min(obstacle_distances)
-        
+        print(min_distance)
         # Check if the minimum distance is below the obstacle distance threshold
         if min_distance < 214.08445782251650:
             # Perform obstacle avoidance actions
