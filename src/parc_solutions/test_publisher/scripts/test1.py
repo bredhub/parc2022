@@ -235,11 +235,11 @@ def act(robot_vel_publisher,  robot_position, right_obstacle):
         #stop 
         stop_robot(robot_vel, robot_vel_publisher)
         msg = "robot stop to turn left"
-        rospy.sleep(1)
+        
         
         #turn left
         turn_left(robot_vel, robot_vel_publisher)
-        rospy.sleep(1)
+        
         
         #continue moving
         robot_vel.linear.x = fwd_vel
