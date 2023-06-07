@@ -218,9 +218,10 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
             initial_distance_right = min_distance
         else:
             first_check = initial_distance_right - min_distance
+            print(first_check)
             if first_check <  0.00000000000004:
                 print("first check")
-                return True   
+                # return True   
         if min_distance < 214.08445782251650:
             # Perform obstacle avoidance actions
             # Example: Stop the robot, change direction, etc.
