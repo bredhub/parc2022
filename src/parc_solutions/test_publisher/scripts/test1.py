@@ -178,9 +178,9 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
             # Perform obstacle avoidance actions
             # Example: Stop the robot, change direction, etc.
             print("Obstacle detected. Taking avoidance action.")
-            return True
+            return [True, min_distance]
     
-    return False
+    return [False , None] 
 
 def analyse_image(scan_data, robot_position, odom_position):
     # if camera_info is None:
@@ -204,7 +204,7 @@ def analyse_image(scan_data, robot_position, odom_position):
         return obstacle_detected
     except Exception as e:
         rospy.logerr(f"Error processing image: {str(e)}")
-        return False
+        return [False, None ]
 
 def right_camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
@@ -228,49 +228,60 @@ def turn_right(robot_vel, robot_vel_publisher):
     robot_vel.linear.x = 0.0
     robot_vel.angular.z = -0.07
     robot_vel_publisher.publish(robot_vel)
+
+
+def drift_left(robot_vel, robot_vel_publisher):
     
+     #stop 
+    stop_robot(robot_vel, robot_vel_publisher)
+    msg = "robot stop to turn left"
+    rospy.sleep(0.05)
+    
+    #turn left
+    turn_left(robot_vel, robot_vel_publisher)
+    rospy.sleep(0.05)
+    stop_robot(robot_vel, robot_vel_publisher)
+    #continue moving
+    
+    rospy.sleep(0.05)
+    robot_vel.linear.x = fwd_vel
+    robot_vel.angular.z = 0.0
+    robot_vel_publisher.publish(robot_vel) 
+
+def drift_right(robot_vel, robot_vel_publisher):
+    
+     #stop 
+    stop_robot(robot_vel, robot_vel_publisher)
+    msg = "robot stop to turn left"
+    rospy.sleep(0.05)
+    
+    #turn left
+    turn_left(robot_vel, robot_vel_publisher)
+    rospy.sleep(0.05)
+    stop_robot(robot_vel, robot_vel_publisher)
+    #continue moving
+    
+    rospy.sleep(0.05)
+    robot_vel.linear.x = fwd_vel
+    robot_vel.angular.z = 0.0
+    robot_vel_publisher.publish(robot_vel) 
+     
 def act(robot_vel_publisher,  robot_position, right_obstacle, left_obstacle):
     
     global desired_angular_vel
     robot_vel = Twist()
     fwd_vel = 0.2
     
-    if right_obstacle:
-        #stop 
-        stop_robot(robot_vel, robot_vel_publisher)
-        msg = "robot stop to turn left"
-        rospy.sleep(0.05)
+    if right_obstacle[0] and left_obstacle[0]:
+        if right_obstacle[1] < left_obstacle[1]:
+            drift_left(robot_vel, robot_vel_publisher)
+        else:
+            drift_right(robot_vel, robot_vel_publisher)
         
-        #turn left
-        turn_left(robot_vel, robot_vel_publisher)
-        rospy.sleep(0.05)
-        stop_robot(robot_vel, robot_vel_publisher)
-        #continue moving
-        
-        rospy.sleep(0.05)
-        robot_vel.linear.x = fwd_vel
-        robot_vel.angular.z = 0.0
-        robot_vel_publisher.publish(robot_vel)
-    
-    
-    if left_obstacle:
-        #stop 
-        stop_robot(robot_vel, robot_vel_publisher)
-        msg = "robot stop to turn right"
-        rospy.sleep(0.01)
-        
-        #turn left
-        turn_right(robot_vel, robot_vel_publisher)
-        rospy.sleep(0.01)
-        stop_robot(robot_vel, robot_vel_publisher)
-        #continue moving
-        
-        rospy.sleep(0.01)
-        robot_vel.linear.x = fwd_vel
-        robot_vel.angular.z = 0.0
-        robot_vel_publisher.publish(robot_vel)
-        
-        
+    elif right_obstacle[0] and not left_obstacle[0]:
+        drift_left(robot_vel, robot_vel_publisher)
+    elif not right_obstacle[0] and left_obstacle[0]:
+        drift_right(robot_vel, robot_vel_publisher)
     else:
         #continue moving
         robot_vel.linear.x = fwd_vel
