@@ -198,7 +198,7 @@ def estimate_distances(cv_image, robot_position, image_width, image_height, came
                                           (world_frame_coordinates[1] - robot_y) ** 2)
             
             obstacle_distances.append(distance_to_robot)
-    print(object_distances)
+    print(obstacle_distances)
     if obstacle_detected: 
         min_distance = min(obstacle_distances)
         
