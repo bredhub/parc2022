@@ -234,7 +234,7 @@ def drift_left(robot_vel, robot_vel_publisher):
     
      #stop 
     stop_robot(robot_vel, robot_vel_publisher)
-    msg = "robot stop to turn left"
+    
     rospy.sleep(0.05)
     
     #turn left
@@ -252,7 +252,7 @@ def drift_right(robot_vel, robot_vel_publisher):
     
      #stop 
     stop_robot(robot_vel, robot_vel_publisher)
-    msg = "robot stop to turn left"
+    
     rospy.sleep(0.05)
     
     #turn left
@@ -271,11 +271,13 @@ def act(robot_vel_publisher,  robot_position, right_obstacle, left_obstacle):
     global desired_angular_vel
     robot_vel = Twist()
     fwd_vel = 0.2
-    
+    msg = ""
     if right_obstacle[0] and left_obstacle[0]:
         if right_obstacle[1] < left_obstacle[1]:
+            msg = "robot stop to turn left"
             drift_left(robot_vel, robot_vel_publisher)
         else:
+            msg = "robot stop to turn left right"
             drift_right(robot_vel, robot_vel_publisher)
         
     elif right_obstacle[0] and not left_obstacle[0]:
