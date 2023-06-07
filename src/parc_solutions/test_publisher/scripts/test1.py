@@ -283,7 +283,7 @@ def drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
     while True:
         if(abs(goal_yaw - robot_yaw) > 0.1):
             turn_left(robot_vel, robot_vel_publisher)
-            print("turn left")
+            
         else:
             print("stop")
             stop_robot(robot_vel, robot_vel_publisher)
