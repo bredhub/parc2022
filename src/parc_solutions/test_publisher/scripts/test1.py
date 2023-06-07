@@ -293,7 +293,7 @@ def analyse_image(scan_data, robot_position, odom_position):
         turn = False
         
         # Perform image processing and distance estimation
-        obstacle_detected = estimate_distances(cv_image, robot_position, image_width, image_height, quaternion)
+        obstacle_detected = estimate_distance(cv_image, robot_position, image_width, image_height, quaternion)
         return obstacle_detected
     except Exception as e:
         rospy.logerr(f"Error processing image: {str(e)}")
