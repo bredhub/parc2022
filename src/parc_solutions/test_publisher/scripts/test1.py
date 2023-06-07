@@ -215,6 +215,14 @@ def left_camera():
     return scan_data
 
 
+def zed_left_camera():
+    scan_data = rospy.wait_for_message('/zed2/left/image_rect_color', Image)
+    return scan_data
+
+def zed_right_camera():
+    scan_data = rospy.wait_for_message('/zed2/right/image_rect_color', Image)
+    return scan_data
+
 def front_camera():
     scan_data = rospy.wait_for_message('/camera/image_raw', Image)
     return scan_data
@@ -343,8 +351,8 @@ def main():
     
     while not rospy.is_shutdown():
         
-        right_camera_scan = right_camera()
-        left_camera_scan = left_camera()
+        right_camera_scan = zed_right_camera()
+        left_camera_scan = zed_left_camera()
         front_camera_scan = front_camera()
         #get position 
         robot_position = gps()
