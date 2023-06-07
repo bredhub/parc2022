@@ -101,61 +101,7 @@ def gps():
     x, y = gps_to_cartesian(current_lat, current_lon)
     return [x, y]
 
-def euler_to_rotation_matrix(roll, pitch, yaw):
-    # Convert Euler angles to rotation matrix
-    rotation_matrix = np.zeros((3, 3))
-    
-    # Roll, pitch, and yaw are in radians
-    cos_roll = np.cos(roll)
-    sin_roll = np.sin(roll)
-    cos_pitch = np.cos(pitch)
-    sin_pitch = np.sin(pitch)
-    cos_yaw = np.cos(yaw)
-    sin_yaw = np.sin(yaw)
-    
-    rotation_matrix[0, 0] = cos_yaw * cos_pitch
-    rotation_matrix[0, 1] = cos_yaw * sin_pitch * sin_roll - sin_yaw * cos_roll
-    rotation_matrix[0, 2] = cos_yaw * sin_pitch * cos_roll + sin_yaw * sin_roll
-    rotation_matrix[1, 0] = sin_yaw * cos_pitch
-    rotation_matrix[1, 1] = sin_yaw * sin_pitch * sin_roll + cos_yaw * cos_roll
-    rotation_matrix[1, 2] = sin_yaw * sin_pitch * cos_roll - cos_yaw * sin_roll
-    rotation_matrix[2, 0] = -sin_pitch
-    rotation_matrix[2, 1] = cos_pitch * sin_roll
-    rotation_matrix[2, 2] = cos_pitch * cos_roll
-    
-    return rotation_matrix
 
-def calculate_rotation_matrix(camera_orientation_quaternion):
-    # Convert quaternion to Euler angles
-    camera_orientation_euler = euler_from_quaternion(camera_orientation_quaternion)
-    roll, pitch, yaw = camera_orientation_euler
-    
-    # Calculate rotation matrix from Euler angles
-    rotation_matrix = euler_to_rotation_matrix(0, 0, yaw)
-    
-    return rotation_matrix
-
-def convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_length, robot_position, robot_orientation_quaternion):
-    # Convert blob coordinates to normalized image coordinates
-    normalized_x = (blob_x - (image_width / 2)) / (image_width / 2)
-    normalized_y = (blob_y - (image_height / 2)) / (image_height / 2)
-
-    # Convert to camera frame coordinates
-    camera_frame_x = normalized_x * focal_length
-    camera_frame_y = normalized_y * focal_length
-    camera_frame_z = focal_length
-
-    # Convert quaternion to rotation matrix
-    quaternion = (robot_orientation_quaternion[0], robot_orientation_quaternion[1], robot_orientation_quaternion[2], robot_orientation_quaternion[3])
-
-    _, _, yaw = euler_from_quaternion(quaternion)
-
-    # Calculate world frame coordinates
-    world_frame_x = robot_position[0] + camera_frame_x * np.cos(yaw) - camera_frame_y * np.sin(yaw)
-    world_frame_y = robot_position[1] + camera_frame_x * np.sin(yaw) + camera_frame_y * np.cos(yaw)
-    # world_frame_z = robot_position[2] + camera_frame_z
-
-    return [world_frame_x, world_frame_y]
 
 
 def get_blob_relative_point(image, keypoint):
@@ -213,8 +159,6 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
     obstacle_distances = []
     for keypoint in keypoints:
         blob_x, blob_y = keypoint.pt
-        world_frame_coordinates = convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_length,
-                                                         robot_position, camera_orientation_quaternion)
         da = get_blob_relative_point(thresh_img, keypoint)
         print(da)
         print(robot_position)
@@ -230,11 +174,11 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
        
         # Check if the minimum distance is below the obstacle distance threshold
         print(min_distance)
-        if min_distance < 214.08445782251650:
+        if min_distance < 2.7:
             # Perform obstacle avoidance actions
             # Example: Stop the robot, change direction, etc.
             print("Obstacle detected. Taking avoidance action.")
-            # return True
+            return True
     
     return False
 
@@ -253,7 +197,7 @@ def analyse_image(scan_data, robot_position, odom_position):
         image_height = scan_data.height
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
-        turn = False
+        
         
         # Perform image processing and distance estimation
         obstacle_detected = estimate_distance(cv_image, robot_position, image_width, image_height, quaternion)
@@ -296,6 +240,11 @@ def act(robot_vel_publisher,  robot_position, right_obstacle):
         #turn left
         turn_left(robot_vel, robot_vel_publisher)
         rospy.sleep(1)
+        
+        #continue moving
+        robot_vel.linear.x = fwd_vel
+        robot_vel.angular.z = 0.0
+        robot_vel_publisher.publish(robot_vel)
         
     else:
         #continue moving
