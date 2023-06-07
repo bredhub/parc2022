@@ -148,8 +148,8 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
                                              cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     
     # Display the image with blobs (for visualization purposes)
-    cv2.imshow("Obstacle Detection", image_with_blobs)
-    cv2.waitKey(1)
+    # cv2.imshow("Obstacle Detection", image_with_blobs)
+    # cv2.waitKey(1)
     # print(keypoints)
     obstacle_detected = len(keypoints) > 0
     # keypoints = keypoints
