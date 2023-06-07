@@ -239,9 +239,10 @@ def act(robot_vel_publisher,  robot_position, right_obstacle):
         
         #turn left
         turn_left(robot_vel, robot_vel_publisher)
-        rospy.sleep(1)
+        
         stop_robot(robot_vel, robot_vel_publisher)
         #continue moving
+        rospy.sleep(1)
         robot_vel.linear.x = fwd_vel
         robot_vel.angular.z = 0.0
         robot_vel_publisher.publish(robot_vel)
