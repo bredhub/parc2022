@@ -217,42 +217,68 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
             print("Obstacle detected. Taking avoidance action.")
             return True
     
-    # return False
+    return False
 
 def analyse_image(scan_data, robot_position, odom_position):
     # if camera_info is None:
     #     rospy.logwarn('Camera info not available yet.')
     #     return False
-    # try:
-    orientation = odom_position.pose.pose.orientation
-    
-    # Convert the orientation to Euler angles
-    (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-    quaternion = quaternion_from_euler(roll, pitch, yaw)
-    print(quaternion)
-    image_width = scan_data.width
-    image_height = scan_data.height
-    bridge = CvBridge()
-    cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
-    turn = False
-    
-    # Perform image processing and distance estimation
-    obstacle_detected = estimate_distance(cv_image, robot_position, image_width, image_height, quaternion)
-    return obstacle_detected
-    # except Exception as e:
-    #     rospy.logerr(f"Error processing image: {str(e)}")
-    #     return False
+    try:
+        orientation = odom_position.pose.pose.orientation
+        
+        # Convert the orientation to Euler angles
+        (roll, pitch, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+        quaternion = quaternion_from_euler(roll, pitch, yaw)
+        # print(quaternion)
+        image_width = scan_data.width
+        image_height = scan_data.height
+        bridge = CvBridge()
+        cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
+        turn = False
+        
+        # Perform image processing and distance estimation
+        obstacle_detected = estimate_distance(cv_image, robot_position, image_width, image_height, quaternion)
+        return obstacle_detected
+    except Exception as e:
+        rospy.logerr(f"Error processing image: {str(e)}")
+        return False
 
-def camera():
+def right_camera():
     scan_data = rospy.wait_for_message('/right_camera/image_raw', Image)
     return scan_data
 
-def act(robot_vel_publisher,  robot_position):
+def stop_robot(robot_vel, robot_vel_publisher):
+    robot_vel.linear.x = 0.0
+    robot_vel.angular.z = 0.0
+    robot_vel_publisher.publish(robot_vel)
+    
+def turn_left(robot_vel, robot_vel_publisher):
+    robot_vel.linear.x = 0.0
+    robot_vel.angular.z = 0.07
+    robot_vel_publisher.publish(robot_vel)
+    
+def turn_right(robot_vel, robot_vel_publisher):
+    robot_vel.linear.x = 0.0
+    robot_vel.angular.z = -0.07
+    robot_vel_publisher.publish(robot_vel)
+    
+def act(robot_vel_publisher,  robot_position, right_obstacle):
+    
     global desired_angular_vel
     robot_vel = Twist()
     fwd_vel = 0.2
     
-    if True:
+    if right_obstacle:
+        #stop 
+        stop_robot(robot_vel, robot_vel_publisher)
+        msg = "robot stop to turn left"
+        rospy.sleep(1)
+        
+        #turn left
+        turn_left(robot_vel, robot_vel_publisher)
+        rospy.sleep(1)
+        
+    else:
         #continue moving
         robot_vel.linear.x = fwd_vel
         robot_vel.angular.z = 0.0
@@ -273,7 +299,7 @@ def main():
     
     while not rospy.is_shutdown():
         
-        camera_scan = camera()
+        right_camera_scan = right_camera()
         
         #get position 
         robot_position = gps()
@@ -282,10 +308,10 @@ def main():
         position_robot = odom()
         
         #front camera
-        front_call = analyse_image(camera_scan, robot_position, position_robot)
+        right_obstacle = analyse_image(right_camera_scan, robot_position, position_robot)
         
         
-        message = act(robot_vel_publisher,  robot_position)
+        message = act(robot_vel_publisher,  robot_position, right_obstacle)
     
         
         print(f'At time []: {message}!')
