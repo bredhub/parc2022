@@ -253,7 +253,23 @@ def act(robot_vel_publisher,  robot_position, right_obstacle, left_obstacle):
         robot_vel_publisher.publish(robot_vel)
     
     
-    elif 
+    elif left_obstacle:
+        #stop 
+        stop_robot(robot_vel, robot_vel_publisher)
+        msg = "robot stop to turn right"
+        rospy.sleep(0.01)
+        
+        #turn left
+        turn_right(robot_vel, robot_vel_publisher)
+        rospy.sleep(0.01)
+        stop_robot(robot_vel, robot_vel_publisher)
+        #continue moving
+        
+        rospy.sleep(0.01)
+        robot_vel.linear.x = fwd_vel
+        robot_vel.angular.z = 0.0
+        robot_vel_publisher.publish(robot_vel)
+        
         
     else:
         #continue moving
