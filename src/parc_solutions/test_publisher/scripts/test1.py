@@ -148,8 +148,8 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
                                              cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     
     # Display the image with blobs (for visualization purposes)
-    cv2.imshow("Obstacle Detection", image_with_blobs)
-    cv2.waitKey(1)
+    # cv2.imshow("Obstacle Detection", image_with_blobs)
+    # cv2.waitKey(1)
     # print(keypoints)
     obstacle_detected = len(keypoints) > 0
     # keypoints = keypoints
@@ -174,7 +174,7 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
        
         # Check if the minimum distance is below the obstacle distance threshold
         print(min_distance)
-        if min_distance < 2.7:
+        if min_distance < 2.55:
             # Perform obstacle avoidance actions
             # Example: Stop the robot, change direction, etc.
             print("Obstacle detected. Taking avoidance action.")
