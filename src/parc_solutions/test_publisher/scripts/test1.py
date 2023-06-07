@@ -87,7 +87,7 @@ prev_location = all_points[prev_index_target]
 main_goal_met = False
 desired_angular_vel = 0.0
 current_orientation = None
-
+initial_distance_right = None
 
 def odom():
     scan_data = rospy.wait_for_message('odom', Odometry)
@@ -161,7 +161,7 @@ def convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_leng
 
 
 def estimate_distance(cv_image, robot_position, image_width, image_height, camera_orientation_quaternion):
-    global keypoints
+    global keypoints, initial_distance_right
     focal_length = 288
     # Convert the image to grayscale
     gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
@@ -212,10 +212,16 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
     # print("obstacel")
     if obstacle_detected:
         min_distance = min(obstacle_distances)
-        
+        first_check = 0
         # Check if the minimum distance is below the obstacle distance threshold
-        print(min_distance)
-        if min_distance < 200:
+        if  initial_distance_right is None:
+            initial_distance_right = min_distance
+        else:
+            first_check = initial_distance_right - min_distance
+        if first_check <  0.00000000000004:
+            print("first check")
+            return True   
+        if min_distance < 214.08445782251650:
             # Perform obstacle avoidance actions
             # Example: Stop the robot, change direction, etc.
             print("Obstacle detected. Taking avoidance action.")
