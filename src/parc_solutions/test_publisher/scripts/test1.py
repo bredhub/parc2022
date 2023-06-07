@@ -300,10 +300,10 @@ def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, le
     print(front_obstacle)
     if front_obstacle[0] and right_obstacle[0]:
         msg = "front camera discovered item on right"
-        drift_left(robot_vel, robot_vel_publisher)
+        drift_right(robot_vel, robot_vel_publisher)
     elif front_obstacle[0] and left_obstacle[0]:
         msg = "front camera discovered item on left"
-        drift_right(robot_vel, robot_vel_publisher)
+        drift_left(robot_vel, robot_vel_publisher)
     elif front_obstacle[0] and right_obstacle[0] and left_obstacle[0]:
         if right_obstacle[1] > left_obstacle[1]:
             msg = "all camera discovered byt right greater than left"
