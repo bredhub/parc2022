@@ -291,10 +291,10 @@ def act(robot_vel_publisher,  robot_position, right_obstacle, left_obstacle):
     #     drift_right(robot_vel, robot_vel_publisher)
     if right_obstacle[0]:
         msg = "robot stop to turn left obstacle"
-        drift_left(robot_vel, robot_vel_publisher)
+        drift_right(robot_vel, robot_vel_publisher)
     elif left_obstacle[0]:
         msg = "robot stop to turn right obstacle"
-        drift_right(robot_vel, robot_vel_publisher)
+        drift_left(robot_vel, robot_vel_publisher)
     else:
         #continue moving
         robot_vel.linear.x = fwd_vel
