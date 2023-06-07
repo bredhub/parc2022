@@ -174,7 +174,7 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
        
         # Check if the minimum distance is below the obstacle distance threshold
         print(min_distance)
-        if min_distance < 2.5:
+        if min_distance < 2.7:
             # Perform obstacle avoidance actions
             # Example: Stop the robot, change direction, etc.
             print("Obstacle detected. Taking avoidance action.")
@@ -197,7 +197,7 @@ def analyse_image(scan_data, robot_position, odom_position):
         image_height = scan_data.height
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(scan_data, desired_encoding='bgr8')
-        turn = False
+        
         
         # Perform image processing and distance estimation
         obstacle_detected = estimate_distance(cv_image, robot_position, image_width, image_height, quaternion)
