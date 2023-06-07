@@ -282,8 +282,6 @@ def check_robot_orientation(data):
     return yaw  
 
 def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, left_obstacle, front_obstacle):
-    
-    global desired_angular_vel
     robot_vel = Twist()
     fwd_vel = 0.2
     msg = ""
@@ -292,19 +290,30 @@ def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, le
     print(right_obstacle)
     print(left_obstacle)
     print(front_obstacle)
-    if right_obstacle[0]:
-        msg = "robot stop to turn left obstacle"
+    if front_obstacle[0] and right_obstacle[0]:
+        msg = "front camera discovered item on right"
+        drift_left(robot_vel, robot_vel_publisher)
+    elif front_obstacle[0] and right_obstacle[0]:
+        msg = "front camera discovered item on left"
         drift_right(robot_vel, robot_vel_publisher)
+    elif front_obstacle[0] and robot_orientation > -3.0:
+        msg = "front camera discovered item on position greater than -3.0"
+        drift_right(robot_vel, robot_vel_publisher)
+    elif front_obstacle[0] and robot_orientation < -3.0:
+        msg = "front camera discovered item on position less than -3.0"
+        drift_left(robot_vel, robot_vel_publisher)
+    elif right_obstacle[0]:
+        msg = "robot stop to turn left obstacle"
+        drift_left(robot_vel, robot_vel_publisher)
     elif left_obstacle[0]:
         msg = "robot stop to turn right obstacle"
-        drift_left(robot_vel, robot_vel_publisher)
+        drift_right(robot_vel, robot_vel_publisher)
     else:
         #continue moving
         robot_vel.linear.x = fwd_vel
         robot_vel.angular.z = 0.0
         msg = "Robot continue moving \n"
         robot_vel_publisher.publish(robot_vel)
-     
     return msg
     
 
