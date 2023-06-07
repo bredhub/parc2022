@@ -158,58 +158,18 @@ def convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_leng
     return [world_frame_x, world_frame_y]
 
 
-def estimate_distances(cv_image, robot_position, image_width, image_height, camera_orientation_quaternion):
-    global keypoints, initial_distance_right
-    focal_length = 288
+def get_blob_relative_point(image, keypoint):
+    cols = float(image.shape[0])
+    rows = float(image.shape[1])
     
-    # Convert the image to HSV color space
-    hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+    center_x = 0.5*cols
+    center_y = 0.5 * rows
     
-    # Define the color range for thresholding
-    lower_color = (39, 106, 124)
-    upper_color = (77, 237, 189)
+    x = (keypoint.pt[0] - center_x)/center_x
+    y = (keypoint.pt[1] - center_y)/center_y
     
-    # Apply a color threshold to obtain a binary image
-    mask = cv2.inRange(hsv_image, lower_color, upper_color)
     
-    # Find contours in the binary image
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    obstacle_detected = len(contours) > 0
-    
-    robot_x = robot_position[0]
-    robot_y = robot_position[1]
-    
-    obstacle_distances = []
-    for contour in contours:
-        # Calculate the centroid of the contour
-        M = cv2.moments(contour)
-        if M["m00"] != 0:
-            centroid_x = int(M["m10"] / M["m00"])
-            centroid_y = int(M["m01"] / M["m00"])
-            
-            # Convert centroid coordinates to world frame
-            world_frame_coordinates = convert_to_world_frame(centroid_x, centroid_y, image_width, image_height,
-                                                             focal_length, robot_position,
-                                                             camera_orientation_quaternion)
-            
-            # Calculate the distance from the centroid to the robot
-            distance_to_robot = math.sqrt((world_frame_coordinates[0] - robot_x) ** 2 +
-                                          (world_frame_coordinates[1] - robot_y) ** 2)
-            
-            obstacle_distances.append(distance_to_robot)
-    
-    if obstacle_detected: 
-        min_distance = min(obstacle_distances)
-        print(min_distance)
-        # Check if the minimum distance is below the obstacle distance threshold
-        if min_distance < 214.08445782251650:
-            # Perform obstacle avoidance actions
-            # Example: Stop the robot, change direction, etc.
-            print("Obstacle detected. Taking avoidance action.")
-            return True
-    
-    return False
+    return [x, y]
 
 
 def estimate_distance(cv_image, robot_position, image_width, image_height, camera_orientation_quaternion):
@@ -221,11 +181,11 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
     COLOR_MIN = (39, 106, 124)
     COLOR_MAX = (77, 237, 189)
     thresh_img = cv2.inRange(gray_image, COLOR_MIN, COLOR_MAX)
-    
+    thresh_img = cv2.erode(thresh_img, None)
     params = cv2.SimpleBlobDetector_Params()
     # Set parameters for blob detection (change as needed)
-    params.minThreshold = 10
-    params.maxThreshold = 200
+    params.minThreshold = 30
+    params.maxThreshold = 20000
     params.filterByArea = True
     params.minArea = 100
     params.filterByCircularity = False
@@ -255,7 +215,8 @@ def estimate_distance(cv_image, robot_position, image_width, image_height, camer
         blob_x, blob_y = keypoint.pt
         world_frame_coordinates = convert_to_world_frame(blob_x, blob_y, image_width, image_height, focal_length,
                                                          robot_position, camera_orientation_quaternion)
-        print(world_frame_coordinates)
+        da = get_blob_relative_point(thresh_img, keypoint)
+        print(da)
         distance_to_robot = math.sqrt((world_frame_coordinates[0] - robot_position[0]) ** 2 + (world_frame_coordinates[1] - robot_position[1]) ** 2)
         blob_radius = keypoint.size / 2
         distance_to_edge = distance_to_robot - blob_radius
@@ -293,7 +254,7 @@ def analyse_image(scan_data, robot_position, odom_position):
         turn = False
         
         # Perform image processing and distance estimation
-        obstacle_detected = estimate_distances(cv_image, robot_position, image_width, image_height, quaternion)
+        obstacle_detected = estimate_distance(cv_image, robot_position, image_width, image_height, quaternion)
         return obstacle_detected
     except Exception as e:
         rospy.logerr(f"Error processing image: {str(e)}")
