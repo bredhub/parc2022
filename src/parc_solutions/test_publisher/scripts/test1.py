@@ -285,6 +285,7 @@ def drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
     
     goal_diff = check_robot_yaw_goal_yaw()
     print(goal_diff)
+    print("goal_diff")
     while True:
         if(goal_diff > 0.1):
             turn_left(robot_vel, robot_vel_publisher)
