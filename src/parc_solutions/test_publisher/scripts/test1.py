@@ -303,24 +303,23 @@ def drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
     # print("moves")
    
 def drift_right(robot_vel, robot_vel_publisher,robot_position, robot_orientation):
-    robot_yaw = robot_orientation
-    goal_yaw = calculate_desired_heading(robot_position[0], robot_position[1])
-    print(robot_yaw)
-    print("robot yaw")
-    print("goal_yaw")
-    print(goal_yaw)     
+    
      #stop 
     stop_robot(robot_vel, robot_vel_publisher)
     print("stop")
     rospy.sleep(0.5)
-    print("turn right")
+    
+    #turn left
     turn_right(robot_vel, robot_vel_publisher)
+    print("turn left")
     rospy.sleep(0.05)
+    
+    goal_diff = check_robot_yaw_goal_yaw()
+    print(goal_diff)
     while True:
-        
-        if(abs(goal_yaw - robot_yaw) > 0.1):
+        if(goal_diff > 0.1):
             turn_right(robot_vel, robot_vel_publisher)
-            print("turn right")
+            goal_diff = check_robot_yaw_goal_yaw()
         else:
             print("stop")
             stop_robot(robot_vel, robot_vel_publisher)
@@ -328,9 +327,6 @@ def drift_right(robot_vel, robot_vel_publisher,robot_position, robot_orientation
             
             rospy.sleep(0.5)
             break
-    
-    
-    
     
     
     # robot_vel.linear.x = 0.1
