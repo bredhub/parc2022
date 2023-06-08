@@ -254,13 +254,22 @@ def calculate_desired_heading(current_lat, current_lon):
     print(delta_lat)
     print("-------")
     # # Convert delta_lat and delta_lon to radians
-    # delta_lat_rad = math.radians(delta_lat)
-    # delta_lon_rad = math.radians(delta_lon)
+    delta_lat_rad = math.radians(delta_lat)
+    delta_lon_rad = math.radians(delta_lon)
 
     # Calculate the desired heading angle
-    desired_heading = math.atan2(delta_lon, delta_lat)
+    desired_heading = math.atan2(delta_lon_rad, delta_lat_rad)
 
     return desired_heading
+
+
+def check_robot_yaw_goal_yaw():
+    robot_position = gps()
+    position_robot = odom()
+    
+    robot_orientation = check_robot_orientation(position_robot)
+    goal_yaw = calculate_desired_heading(robot_position[0], robot_position[1])
+    return  abs(goal_yaw - robot_orientation)
 
 def drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation):
     
@@ -287,7 +296,6 @@ def drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
             
             rospy.sleep(0.5)
             break
-    
     # rospy.sleep(0.05)
     # robot_vel.linear.x = 0.05
     # robot_vel.angular.z = 0.0
@@ -330,7 +338,6 @@ def drift_right(robot_vel, robot_vel_publisher,robot_position, robot_orientation
     # robot_vel_publisher.publish(robot_vel) 
     # print("keep moving")
     
-
 def check_robot_orientation(data):
     orientation = data.pose.pose.orientation
         
@@ -340,15 +347,6 @@ def check_robot_orientation(data):
     # Update the robot's current orientation (theta)
     return yaw  
 
-
-def check_robot_yaw_goal_yaw():
-    robot_position = gps()
-    position_robot = odom()
-    
-    robot_orientation = check_robot_orientation(position_robot)
-    goal_yaw = calculate_desired_heading(robot_position[0], robot_position[1])
-    
-    return  abs(goal_yaw - robot_orientation)
     
 def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, left_obstacle, front_obstacle):
     robot_vel = Twist()
