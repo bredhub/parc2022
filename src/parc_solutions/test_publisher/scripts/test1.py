@@ -290,6 +290,8 @@ def drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
         if(goal_diff > 0.02):
             turn_left(robot_vel, robot_vel_publisher)
             goal_diff = check_robot_yaw_goal_yaw()
+            print(goal_diff)
+            print("goal_diff")
         else:
             print("stop")
             stop_robot(robot_vel, robot_vel_publisher)
@@ -355,6 +357,8 @@ def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, le
     print(right_obstacle)
     print(left_obstacle)
     print(front_obstacle)
+    goal_diff = check_robot_yaw_goal_yaw()
+    print(goal_diff)
     if front_obstacle[0] and right_obstacle[0]:
         msg = "front camera discovered item on right"
         drift_right(robot_vel, robot_vel_publisher, robot_position, robot_orientation)
