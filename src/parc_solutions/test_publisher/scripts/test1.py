@@ -313,6 +313,7 @@ def drift_right(robot_vel, robot_vel_publisher,robot_position, robot_orientation
     turn_right(robot_vel, robot_vel_publisher)
     rospy.sleep(0.05)
     while True:
+        
         if(abs(goal_yaw - robot_yaw) > 0.1):
             turn_right(robot_vel, robot_vel_publisher)
             print("turn right")
