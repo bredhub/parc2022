@@ -263,8 +263,6 @@ def calculate_desired_heading(current_lat, current_lon):
     return desired_heading
 
 def drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation):
-    robot_yaw = robot_orientation
-    goal_yaw = calculate_desired_heading(robot_position[0], robot_position[1])
     
      #stop 
     stop_robot(robot_vel, robot_vel_publisher)
@@ -276,14 +274,11 @@ def drift_left(robot_vel, robot_vel_publisher,robot_position, robot_orientation)
     print("turn left")
     rospy.sleep(0.05)
     
-    print(robot_yaw)
-    print("robot yaw")
-    print("goal_yaw")
-    print(goal_yaw)  
+    goal_diff = check_robot_yaw_goal_yaw()
     while True:
-        if(abs(goal_yaw - robot_yaw) > 0.1):
+        if(goal_diff > 0.1):
             turn_left(robot_vel, robot_vel_publisher)
-            
+            goal_diff = check_robot_yaw_goal_yaw()
         else:
             print("stop")
             stop_robot(robot_vel, robot_vel_publisher)
@@ -334,6 +329,7 @@ def drift_right(robot_vel, robot_vel_publisher,robot_position, robot_orientation
     # robot_vel_publisher.publish(robot_vel) 
     # print("keep moving")
     
+
 def check_robot_orientation(data):
     orientation = data.pose.pose.orientation
         
@@ -343,6 +339,15 @@ def check_robot_orientation(data):
     # Update the robot's current orientation (theta)
     return yaw  
 
+
+def check_robot_yaw_goal_yaw():
+    robot_position = gps()
+    position_robot = odom()
+    
+    robot_orientation = check_robot_orientation(position_robot)
+    goal_yaw = calculate_desired_heading(robot_position[0], robot_position[1])
+    
+    return  abs(goal_yaw - robot_orientation)
     
 def act(robot_vel_publisher,  robot_position, position_robot, right_obstacle, left_obstacle, front_obstacle):
     robot_vel = Twist()
